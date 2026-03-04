@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>毕业设计测试网站</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <script>
+    (function heavySyncTask() {
+      var total = 0;
+      for (var i = 0; i < 700000; i++) total += Math.sqrt(i % 100);
+      window.__dummyTotal = total;
+    })();
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          await navigator.serviceWorker.register('./sw-throttle.js', { scope: './' });
+          console.log('[SW] registered');
+        } catch (e) {
+          console.warn('[SW] register failed', e);
+        }
+      });
+    }
+    async function setThrottle(profile) {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg.active) {
+        reg.active.postMessage({ type: 'SET_THROTTLE_PROFILE', payload: profile });
+        console.log('[SW] throttle set', profile);
+      }
+    }
+
+    window.setThrottleFast3G = () => setThrottle({ enabled: true, rttMs: 300, jitterMs: 80, downKbps: 800 });
+    window.setThrottleSlow4G = () => setThrottle({ enabled: true, rttMs: 150, jitterMs: 50, downKbps: 1600 });
+    window.setThrottleOff    = () => setThrottle({ enabled: false });
+  </script>
+
+
+  <style>
+    :root{
+      --bg:#070a14;
+      --fg:#eaf2ff;
+      --muted:rgba(234,242,255,0.75);
+      --card:rgba(255,255,255,0.06);
+      --card2:rgba(255,255,255,0.08);
+      --accent:#49a2ff;
+      --danger:#ff5f6d;
+      --ok:#40d39c;
+    }
+    html,body{height:100%; margin:0; background:var(--bg); color:var(--fg); font-family:"Roboto",system-ui,-apple-system,"Segoe UI",sans-serif;}
+    body{overflow:hidden;}
+
+    .topbar{
+      height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 16px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background:linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    }
+    .title{display:flex; flex-direction:column; gap:2px;}
+    .title h1{font-size:16px; margin:0; font-weight:700; letter-spacing:0.3px;}
+    .title .sub{font-size:12px; color:var(--muted);}
+
+    .badges{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+    .badge-like{
+      font-size:11px;
+      padding:4px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.08);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .layout{
+      height:calc(100% - 72px);
+      display:grid;
+      grid-template-rows: 1fr 120px;
+    }
+
+    .wall{
+      padding:10px;
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      grid-template-rows:repeat(3, 1fr);
+      gap:10px;
+    }
+    .tile{
+      position:relative;
+      border-radius:16px;
+      overflow:hidden;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 14px 28px rgba(0,0,0,0.35);
+    }
+    .tile img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      transform:scale(1.02);
+      filter:saturate(1.02) contrast(1.02);
+    }
+    .tile .label{
+      position:absolute;
+      left:10px; top:10px;
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(0,0,0,0.45);
+      border:1px solid rgba(255,255,255,0.14);
+      color:rgba(234,242,255,0.92);
+      backdrop-filter: blur(6px);
+    }
+    .tile .spinner{
+      position:absolute; right:10px; top:10px;
+      width:10px; height:10px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.25);
+      animation:pulse 1.1s infinite ease-in-out;
+    }
+    .tile.loaded .spinner{display:none;}
+    .tile.error .spinner{display:none;}
+    .tile.error::after{
+      content:"image error";
+      position:absolute;
+      bottom:10px; right:10px;
+      font-size:11px;
+      color:rgba(255,95,109,0.95);
+      background:rgba(0,0,0,0.45);
+      border:1px solid rgba(255,95,109,0.35);
+      padding:4px 8px;
+      border-radius:999px;
+    }
+    @keyframes pulse{
+      0%{transform:scale(1); opacity:0.7;}
+      50%{transform:scale(1.6); opacity:1;}
+      100%{transform:scale(1); opacity:0.7;}
+    }
+
+    .statusbar{
+      padding:12px 16px;
+      border-top:1px solid rgba(255,255,255,0.08);
+      background:linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05));
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .status-left{display:flex; flex-direction:column; gap:6px; min-width:280px;}
+    .status-line{font-size:13px; color:var(--muted); white-space:pre-line;}
+    .progress{
+      height:10px; background:rgba(255,255,255,0.08); border-radius:999px; overflow:hidden;
+      border:1px solid rgba(255,255,255,0.10);
+    }
+    .progress > div{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(73,162,255,0.95), rgba(64,211,156,0.90));
+      border-radius:999px;
+      transition:width 180ms ease;
+    }
+    .controls{display:flex; flex-direction:column; gap:8px; align-items:flex-end;}
+    .btn-like{
+      border:none;
+      padding:8px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.08);
+      color:var(--fg);
+      cursor:pointer;
+      font-size:13px;
+      border:1px solid rgba(255,255,255,0.12);
+    }
+    .btn-like.primary{
+      background:var(--accent);
+      border-color:rgba(73,162,255,0.55);
+      color:white;
+    }
+    .btn-like:disabled{opacity:0.5; cursor:not-allowed;}
+
+    .game-overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,0.78);
+      z-index:9999;
+      padding:16px;
+    }
+    .panel{
+      width:min(880px, 95vw);
+      border-radius:18px;
+      background:rgba(10,14,28,0.92);
+      border:1px solid rgba(255,255,255,0.10);
+      box-shadow:0 30px 80px rgba(0,0,0,0.55);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .panel-head .h{font-weight:700; font-size:14px; margin:0;}
+    .panel-head .mini{font-size:12px; color:var(--muted); white-space:pre-line; text-align:right;}
+    .panel-body{
+      padding:16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    @media (max-width: 820px){ .panel-body{grid-template-columns:1fr;} }
+    .block{
+      border-radius:16px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:14px;
+    }
+    .block-title{font-size:12px; color:var(--muted); margin:0 0 8px;}
+    .number{
+      font-size:64px;
+      font-weight:700;
+      letter-spacing:12px;
+      text-align:center;
+      margin:6px 0 12px;
+    }
+    .input-row{display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap;}
+    .input-row input{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(0,0,0,0.25);
+      color:var(--fg);
+      outline:none;
+      min-width:220px;
+      text-align:center;
+      font-size:16px;
+    }
+    .input-row button{
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.14);
+      cursor:pointer;
+      font-size:13px;
+      background:rgba(255,255,255,0.08);
+      color:var(--fg);
+    }
+    .input-row button.primary{background:var(--accent); border-color:rgba(73,162,255,0.55); color:#fff;}
+    .feedback{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:12px;
+      line-height:1.45;
+      white-space:pre-wrap;
+      color:rgba(234,242,255,0.92);
+    }
+    .tag{
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.06);
+      color:var(--muted);
+      margin-left:8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="title">
+      <h1>调差问卷测试网站(未优化)</h1>
+    </div>
+    <div class="badges">
+      <div class="badge-like" id="badge-level">Level: -</div>
+      <div class="badge-like" id="badge-budget">Budget: -</div>
+      <div class="badge-like" id="badge-remaining">Remaining: -</div>
+      <div class="badge-like" id="badge-state">State: loading</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="wall" id="wall">
+      <div class="tile"><span class="label">IMG 1</span><span class="spinner"></span><img class="critical" data-idx="1" data-base="https://picsum.photos/1600/1600?random=1" alt="img1"></div>
+      <div class="tile"><span class="label">IMG 2</span><span class="spinner"></span><img class="critical" data-idx="2" data-base="https://picsum.photos/1600/1600?random=2" alt="img2"></div>
+      <div class="tile"><span class="label">IMG 3</span><span class="spinner"></span><img class="critical" data-idx="3" data-base="https://picsum.photos/1600/1600?random=3" alt="img3"></div>
+      <div class="tile"><span class="label">IMG 4</span><span class="spinner"></span><img class="critical" data-idx="4" data-base="https://picsum.photos/1600/1600?random=4" alt="img4"></div>
+      <div class="tile"><span class="label">IMG 5</span><span class="spinner"></span><img class="critical" data-idx="5" data-base="https://picsum.photos/1600/1600?random=5" alt="img5"></div>
+      <div class="tile"><span class="label">IMG 6</span><span class="spinner"></span><img class="critical" data-idx="6" data-base="https://picsum.photos/1600/1600?random=6" alt="img6"></div>
+      <div class="tile"><span class="label">IMG 7</span><span class="spinner"></span><img class="critical" data-idx="7" data-base="https://picsum.photos/1600/1600?random=7" alt="img7"></div>
+      <div class="tile"><span class="label">IMG 8</span><span class="spinner"></span><img class="critical" data-idx="8" data-base="https://picsum.photos/1600/1600?random=8" alt="img8"></div>
+      <div class="tile"><span class="label">IMG 9</span><span class="spinner"></span><img class="critical" data-idx="9" data-base="https://picsum.photos/1600/1600?random=9" alt="img9"></div>
+    </div>
+
+    <div class="statusbar">
+      <div class="status-left">
+        <div class="status-line" id="status-line">正在等待 9 张图加载完成……</div>
+        <div class="progress" aria-label="load progress"><div id="progress-bar"></div></div>
+        <div class="status-line" id="status-hint">提示：下一关会刷新页面，并通过 cache-busting 强制 9 图重新请求。</div>
+      </div>
+      <div class="controls">
+        <button class="btn-like" id="restart-page">重新开始（第 1 关）</button>
+        <button class="btn-like primary" id="force-start" disabled>强制开始（调试用）</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="game-overlay" id="game-overlay">
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="h" id="panel-title">等待加载完成…</div></div>
+        <div class="mini" id="panel-mini">-</div>
+      </div>
+
+      <div class="panel-body">
+        <div class="block">
+          <div class="block-title">数字展示（Number Display）</div>
+          <div class="number" id="game-number">---</div>
+
+          <div class="input-row" id="input-row" style="display:none;">
+            <input id="guess-input" placeholder="请输入刚才看到的 3 位数字" />
+            <button class="primary" id="submit-btn">提交</button>
+            <button id="close-btn" style="display:none;">关闭</button>
+            <button id="restart-btn" style="display:none;">重来（第 1 关）</button>
+            <button id="next-btn" style="display:none;">下一关</button>
+          </div>
+
+          <div class="status-line" id="game-status" style="margin-top:10px;color:var(--muted);white-space:pre-line;"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">全量反馈（Full Feedback）</div>
+          <div class="feedback" id="feedback">（游戏结束后会在这里输出完整信息）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   0) level + run（cache-busting）
+   - level: 关卡
+   - run: 每次进入关卡的唯一标识，用来强制图片重新请求（Avoid Cache）
+========================= */
+function getIntParam(name, fallback){
+  var params = new URLSearchParams(window.location.search);
+  var v = parseInt(params.get(name), 10);
+  return (isNaN(v) ? fallback : v);
+}
+function getStrParam(name, fallback){
+  var params = new URLSearchParams(window.location.search);
+  var v = params.get(name);
+  return (v == null || v === "") ? fallback : v;
+}
+
+var level = getIntParam("level", 1);
+if (level < 1) level = 1;
+
+// run 用于强制刷新资源请求：下一关会带新的 run
+var run = getStrParam("run", String(Date.now()));
+
+/* =========================
+   1) 指数衰减预算（Exponential Time Budget）
+   T(level) = 3000 * 0.85^(level-1)
+========================= */
+function expBudget(level, startMs, ratio, minMs){
+  var raw = startMs * Math.pow(ratio, (level - 1));
+  return Math.max(minMs, Math.round(raw));
+}
+var levelTimeLimit = expBudget(level, 3000, 0.85, 200); // 你要的主公式（可调下限）
+var idealDisplayTime = expBudget(level, 900, 0.88, 120); // 你原来就有，我保留
+
+/* navigation start（通常为 0） */
+var navEntry = performance.getEntriesByType("navigation")[0];
+var navStartTime = navEntry ? navEntry.startTime : 0;
+
+/* 顶部 badge */
+var badgeLevel = document.getElementById("badge-level");
+var badgeBudget = document.getElementById("badge-budget");
+var badgeRemaining = document.getElementById("badge-remaining");
+var badgeState  = document.getElementById("badge-state");
+badgeLevel.textContent = "Level: " + level;
+badgeBudget.textContent = "Budget: " + levelTimeLimit + "ms";
+badgeRemaining.textContent = "Remaining: ...";
+badgeState.textContent = "State: loading";
+
+/* =========================
+   2) 关键改动：图片 src 在脚本一开始就写入，附加 run 参数强制重新加载
+   - 这样“下一关刷新页面”时，9张图一定会重新发起请求
+========================= */
+var imgNodes = document.querySelectorAll("img.critical");
+for (var s=0; s<imgNodes.length; s++){
+  var base = imgNodes[s].getAttribute("data-base");
+  // 同一个 run 下固定，避免加载过程中变动；不同关卡/不同 run 会强制刷新
+  imgNodes[s].src = base + "&lv=" + encodeURIComponent(level) + "&run=" + encodeURIComponent(run);
+}
+
+/* =========================
+   3) 9 图门控（Gate）+ 计时信息
+========================= */
+var statusLine = document.getElementById("status-line");
+var progressBar = document.getElementById("progress-bar");
+var forceStartBtn = document.getElementById("force-start");
+var tiles = document.querySelectorAll(".tile");
+
+var imgMetrics = []; // [{idx, status, endMs}]
+for (var i=0;i<imgNodes.length;i++){
+  imgMetrics.push({ idx: i+1, status: "pending", endMs: null });
+}
+
+var loadedCount = 0;
+function updateProgress(){
+  var pct = Math.round((loadedCount / imgNodes.length) * 100);
+  progressBar.style.width = pct + "%";
+  statusLine.textContent = "正在等待 9 张图加载完成……(" + loadedCount + "/9, " + pct + "%)";
+}
+function markTile(idx, ok){
+  var tile = tiles[idx-1];
+  if (!tile) return;
+  tile.classList.add(ok ? "loaded" : "error");
+}
+function finalizeImage(idx, ok){
+  if (imgMetrics[idx-1].status !== "pending") return;
+  imgMetrics[idx-1].status = ok ? "load" : "error";
+  imgMetrics[idx-1].endMs = performance.now() - navStartTime;
+  loadedCount++;
+  markTile(idx, ok);
+  updateProgress();
+
+  if (loadedCount === imgNodes.length){
+    forceStartBtn.disabled = false;
+
+    // 门控完成：冻结“加载倒计时”（不再影响后续输入）
+    freezeLoadCountdown();
+
+    // 无论是否 timeUp，都交给 onAllImagesReady 去统一处理
+    if (!gameEnded){
+      badgeState.textContent = "State: ready";
+      onAllImagesReady();
+    }
+  }
+}
+for (var j=0;j<imgNodes.length;j++){
+  (function(img, idx){
+    if (img.complete){
+      var ok = (img.naturalWidth && img.naturalWidth > 0);
+      finalizeImage(idx, ok);
+      return;
+    }
+    img.addEventListener("load", function(){ finalizeImage(idx, true); }, { once:true });
+    img.addEventListener("error", function(){ finalizeImage(idx, false); }, { once:true });
+  })(imgNodes[j], j+1);
+}
+updateProgress();
+
+/* =========================
+   4) 仅加载倒计时（Load Countdown）
+   - 只用于“加载阶段是否超时”
+   - 门控完成（9图 ready）后停止/冻结，不再影响人类输入
+========================= */
+var countdownTimer = null;
+var timeUp = false;       // 仅表示“加载阶段超时”
+var timeUpAt = null;      // 超时发生时刻（ms since nav start）
+var loadCountdownFrozen = false;
+var frozenRemainingMs = null;
+
+function getLoadRemainingMs(){
+  if (loadCountdownFrozen) return frozenRemainingMs;
+  var elapsed = performance.now() - navStartTime;
+  return Math.max(0, Math.round(levelTimeLimit - elapsed));
+}
+
+function freezeLoadCountdown(){
+  if (loadCountdownFrozen) return;
+  loadCountdownFrozen = true;
+  frozenRemainingMs = getLoadRemainingMs();
+  if (countdownTimer){
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+  // UI：冻结显示
+  badgeRemaining.textContent = "Remaining(load): " + frozenRemainingMs + "ms";
+}
+
+function startLoadCountdown(){
+  if (countdownTimer) return;
+  countdownTimer = setInterval(function(){
+    var remaining = getLoadRemainingMs();
+    badgeRemaining.textContent = "Remaining(load): " + remaining + "ms";
+
+    if (remaining <= 0 && !timeUp && !gameEnded){
+      // 只标记“加载阶段超时”，不立刻结束（deferred）
+      timeUp = true;
+      timeUpAt = performance.now() - navStartTime;
+      badgeState.textContent = "State: load_time_up_deferred";
+    }
+  }, 50);
+}
+
+startLoadCountdown();
+
+
+/* =========================
+   5) 游戏（Game）
+   - 若 timeUp 先发生：直接 no_time
+   - 否则等 9 图 ready 后开始出题
+========================= */
+var gameOverlay = document.getElementById("game-overlay");
+var panelTitle = document.getElementById("panel-title");
+var panelMini  = document.getElementById("panel-mini");
+var gameNumber = document.getElementById("game-number");
+var gameStatus = document.getElementById("game-status");
+var inputRow   = document.getElementById("input-row");
+var guessInput = document.getElementById("guess-input");
+var submitBtn  = document.getElementById("submit-btn");
+var closeBtn   = document.getElementById("close-btn");
+var restartBtn = document.getElementById("restart-btn");
+var nextBtn    = document.getElementById("next-btn");
+var feedbackEl = document.getElementById("feedback");
+
+
+
+var currentCode = "";
+var gameEnded = false;
+
+var metrics = {
+  level: level,
+  run: run,
+  levelTimeLimit: levelTimeLimit,
+  idealDisplayTime: idealDisplayTime,
+  navStartTime: navStartTime,
+
+  allImagesReadyAt: null,
+  loadDurationAtGate: null,
+  leftoverTimeAtGate: null,
+
+  actualDisplayTime: null,
+  numberShownAt: null,
+  numberHiddenAt: null,
+
+  userSubmitAt: null,
+  userGuess: null,
+  result: null, // "no_time" / "correct" / "wrong"
+  imgMetrics: imgMetrics
+};
+
+// ==== Device / Performance Info ====
+var deviceInfo = {
+  hardwareConcurrency: navigator.hardwareConcurrency || "N/A", // CPU logical cores
+  deviceMemory: navigator.deviceMemory || "N/A",               // RAM (GB)
+  userAgent: navigator.userAgent || "N/A"
+};
+
+// ==== Network RTT (Round Trip Time) ====
+var networkRTT = "N/A";
+if (navigator.connection && navigator.connection.rtt){
+  networkRTT = navigator.connection.rtt; // ms
+}
+
+var remainingTime = levelTimeLimit - metrics.loadDurationAtGate;
+
+function generateCode(){
+  currentCode = Math.floor(100 + Math.random() * 900).toString();
+}
+
+function showOverlayBase(){
+  gameOverlay.style.display = "flex";
+  inputRow.style.display = "flex";
+  closeBtn.style.display = "inline-block";
+}
+
+function onAllImagesReady(){
+  if (gameEnded) return;
+
+  metrics.allImagesReadyAt = performance.now() - navStartTime;
+  metrics.loadDurationAtGate = metrics.allImagesReadyAt;
+
+  // 用“gate 时刻的总加载耗时”来判定是否加载超时
+  var loadTooSlow = metrics.loadDurationAtGate > levelTimeLimit;
+
+  if (loadTooSlow){
+    metrics.result = "no_time_load"; // 更清晰：这是加载超时，不是输入超时
+    badgeState.textContent = "State: load_time_up_after_gate";
+    showDeferredLoadNoTimeAfterGate();
+    return;
+  }
+
+  // 加载未超时：开始游戏（之后不再与倒计时绑定）
+  badgeState.textContent = "State: ready_to_play";
+  startGame();
+}
+
+function startGame(){
+  if (gameEnded || timeUp) return;
+
+  showOverlayBase();
+  submitBtn.style.display = "inline-block";
+  guessInput.style.display = "inline-block";
+  restartBtn.style.display = "none";
+  nextBtn.style.display = "none";
+
+  // gate 时刻信息（对论文分析有用）
+  var now = performance.now();
+  var used = now - navStartTime;
+  metrics.loadDurationAtGate = used;
+
+  var leftover = levelTimeLimit - used;
+  metrics.leftoverTimeAtGate = Math.max(0, leftover);
+
+  panelTitle.textContent = "第 " + level + " 关：9 图门控后允许出题";
+  panelMini.textContent =
+    "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
+    "Used until gate: " + Math.round(used) + "ms\n" +
+    "Remaining now: " + Math.max(0, Math.round(leftover)) + "ms";
+
+  if (leftover <= 0){
+    // 理论上 timeUp 会先触发，但这里兜底
+    endByNoTime();
+    return;
+  }
+
+  // 显示数字：显示时间受剩余时间截断（clipped）
+  var actualDisplay = Math.min(idealDisplayTime, leftover);
+  metrics.actualDisplayTime = actualDisplay;
+
+  generateCode();
+  gameNumber.style.display = "block";
+  gameNumber.textContent = currentCode;
+  metrics.numberShownAt = performance.now() - navStartTime;
+
+  gameStatus.textContent =
+    "数字即将隐藏。请记住 3 位数。\n" +
+    "Ideal show: " + idealDisplayTime + "ms\n" +
+    "Actual show (clipped): " + Math.round(actualDisplay) + "ms\n" +
+    "（注意：倒计时从开始加载就已经在走）";
+
+  setTimeout(function(){
+    if (gameEnded) return;
+    gameNumber.style.display = "none";
+    guessInput.value = "";
+    guessInput.focus();
+    metrics.numberHiddenAt = performance.now() - navStartTime;
+    gameStatus.textContent = "请输入刚才看到的 3 位数字：";
+  }, actualDisplay);
+}
+
+function formatReport(){
+
+  var loadTime = metrics.loadDurationAtGate != null
+    ? Math.round(metrics.loadDurationAtGate)
+    : "N/A";
+
+  var remainingTime = (metrics.loadDurationAtGate != null)
+    ? Math.max(0, Math.round(levelTimeLimit - metrics.loadDurationAtGate))
+    : "N/A";
+
+  var actualDisplay = metrics.actualDisplayTime != null
+    ? Math.round(metrics.actualDisplayTime)
+    : "N/A";
+
+  var levelCompletion = metrics.result === "correct" ? 1 : 0;
+
+  var lines = [];
+
+  lines.push("===== Experiment Metrics =====");
+  lines.push("");
+
+  lines.push("LoadTime(ms): " + loadTime);
+  lines.push("RemainingTime(ms): " + remainingTime);
+  lines.push("ActualDisplayTime(ms): " + actualDisplay);
+  lines.push("LevelCompletion(1=pass,0=fail): " + levelCompletion);
+  lines.push("");
+
+  lines.push("----- Device Performance -----");
+  lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);
+  lines.push("DeviceMemory(GB): " + deviceInfo.deviceMemory);
+  lines.push("Browser: " + deviceInfo.userAgent);
+  lines.push("");
+
+  lines.push("----- Network -----");
+  lines.push("RTT(ms): " + networkRTT);
+
+  return lines.join("\n");
+}
+
+
+function finishRound(result){
+  // result: "correct" | "wrong" | "no_time_load" | ...
+  if (gameEnded) return;
+  gameEnded = true;
+
+  metrics.result = result;
+
+  // 统一隐藏输入
+  submitBtn.style.display = "none";
+  guessInput.style.display = "none";
+  closeBtn.style.display = "inline-block";
+
+  // 统一输出反馈（右侧栏）
+  feedbackEl.textContent = formatReport();
+
+  // 统一设置状态
+  badgeState.textContent = "State: finished";
+
+  // 按结果显示按钮
+  if (result === "correct"){
+    nextBtn.style.display = "inline-block";
+    restartBtn.style.display = "none";
+  } else {
+    // wrong / no_time_load 等都走重来
+    nextBtn.style.display = "none";
+    restartBtn.style.display = "inline-block";
+  }
+}
+
+var deferredNoTimeShown = false;
+
+function showDeferredLoadNoTimeAfterGate(){
+  if (deferredNoTimeShown || gameEnded) return;
+  deferredNoTimeShown = true;
+
+  showOverlayBase();
+  panelTitle.textContent = "结束：加载阶段超时（load timeout）";
+  panelMini.textContent =
+    "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
+    "Gate(load) finished at: " + Math.round(metrics.allImagesReadyAt) + "ms\n" +
+    "Time up first observed at: " + (timeUpAt != null ? Math.round(timeUpAt) + "ms" : "N/A");
+
+  gameNumber.textContent = "— — —";
+  gameNumber.style.display = "block";
+
+  gameStatus.textContent =
+    "本实验只评估网页加载速度（First-screen load）。\n" +
+    "你在 9 图门控完成时的加载耗时为 " + Math.round(metrics.allImagesReadyAt) + "ms，已超过预算 " + levelTimeLimit + "ms。\n" +
+    "因此判定为加载阶段超时；人类输入时间不参与倒计时。";
+
+  // 结束态：只能重来（第1关）
+  submitBtn.style.display = "none";
+  guessInput.style.display = "none";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "inline-block";
+
+  finishRound("no_time_load");
+}
+
+
+/* 提交答案 */
+submitBtn.addEventListener("click", function(){
+  if (gameEnded) return;
+  var guess = guessInput.value.trim();
+  if (!guess) return;
+
+  metrics.userGuess = guess;
+  metrics.userSubmitAt = performance.now() - navStartTime;
+
+  if (guess === currentCode){
+    panelTitle.textContent = "通过：回答正确";
+    gameStatus.textContent = "你答对了。可进入下一关（会刷新页面并重新加载 9 图）。";
+    finishRound("correct");
+  } else {
+    panelTitle.textContent = "结束：回答错误";
+    gameStatus.textContent = "你答错了。本次实验结束（输出全量反馈）。";
+    finishRound("wrong");
+  }
+});
+
+
+/* 回车提交 */
+guessInput.addEventListener("keydown", function(e){
+  if (e.key === "Enter") submitBtn.click();
+});
+
+/* 关闭 overlay */
+closeBtn.addEventListener("click", function(){
+  gameOverlay.style.display = "none";
+});
+
+/* 重来（第 1 关） */
+restartBtn.addEventListener("click", function(){
+  var url = new URL(window.location.href);
+  url.searchParams.set("level", 1);
+  url.searchParams.set("run", String(Date.now()));
+  window.location.href = url.toString();
+});
+
+/* 下一关：刷新页面 + 强制 9 图重新加载 */
+nextBtn.addEventListener("click", function(){
+  var url = new URL(window.location.href);
+  url.searchParams.set("level", level + 1);
+  url.searchParams.set("run", String(Date.now())); // 新 run -> 图片 src 的 run 也会变 -> 强制重新请求
+  window.location.href = url.toString();
+});
+
+/* 底部：重新开始（第 1 关） */
+document.getElementById("restart-page").addEventListener("click", function(){
+  var url = new URL(window.location.href);
+  url.searchParams.set("level", 1);
+  url.searchParams.set("run", String(Date.now()));
+  window.location.href = url.toString();
+});
+
+/* 调试：强制开始（跳过等待） */
+forceStartBtn.addEventListener("click", function(){
+  if (gameEnded || timeUp) return;
+
+  if (loadedCount < imgNodes.length){
+    for (var i=0;i<imgMetrics.length;i++){
+      if (imgMetrics[i].status === "pending"){
+        imgMetrics[i].status = "error";
+        imgMetrics[i].endMs = performance.now() - navStartTime;
+        markTile(i+1, false);
+        loadedCount++;
+      }
+    }
+    updateProgress();
+  }
+  badgeState.textContent = "State: forced";
+  metrics.allImagesReadyAt = performance.now() - navStartTime;
+  startGame();
+});
+</script>
+</body>
+</html>
