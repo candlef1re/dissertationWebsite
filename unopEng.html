@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dissertation Experiment Website</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0a1020;
+      --panel:#121a2d;
+      --panel2:#16213b;
+      --fg:#eef4ff;
+      --muted:rgba(238,244,255,0.72);
+      --line:rgba(255,255,255,0.10);
+      --accent:#4da3ff;
+      --ok:#41d39b;
+      --danger:#ff6a78;
+      --warn:#f5be4f;
+      --shadow:0 18px 42px rgba(0,0,0,0.35);
+    }
+
+    *{box-sizing:border-box;}
+    html,body{
+      margin:0;
+      padding:0;
+      background:linear-gradient(180deg,#09101d 0%, #0b1222 100%);
+      color:var(--fg);
+      font-family:"Roboto",system-ui,-apple-system,"Segoe UI",sans-serif;
+    }
+    body{min-height:100vh; overflow:auto;}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(10,16,32,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width:1400px;
+      margin:0 auto;
+      padding:14px 18px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      position:relative;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .badges{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .badge-like{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid var(--line);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .top-progress{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:4px;
+      background:rgba(255,255,255,0.07);
+      overflow:hidden;
+    }
+    .top-progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(77,163,255,0.95), rgba(65,211,155,0.95));
+      transition:width .18s ease;
+    }
+
+    .page{
+      max-width:1400px;
+      margin:0 auto;
+      padding:18px;
+    }
+
+    .searchbar{
+      display:grid;
+      grid-template-columns: 1fr auto auto;
+      gap:10px;
+      margin-bottom:16px;
+    }
+    .searchbar input{
+      background:rgba(255,255,255,0.06);
+      border:1px solid var(--line);
+      color:var(--fg);
+      border-radius:14px;
+      padding:12px 14px;
+      outline:none;
+    }
+    .btn-like{
+      border:none;
+      padding:11px 15px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.08);
+      color:var(--fg);
+      cursor:pointer;
+      font-size:13px;
+      border:1px solid rgba(255,255,255,0.14);
+    }
+    .btn-like.primary{
+      background:var(--accent);
+      color:#fff;
+      border-color:rgba(77,163,255,0.55);
+    }
+    .btn-like.warn{
+      background:rgba(245,190,79,0.16);
+      border-color:rgba(245,190,79,0.35);
+      color:#ffe29a;
+    }
+    .btn-like:disabled{opacity:.55; cursor:not-allowed;}
+
+    .hero{
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap:14px;
+      margin-bottom:16px;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(206, 17, 17, 0.05), rgba(225, 240, 16, 0.035));
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card-pad{padding:16px;}
+    .card-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+
+    }
+    .card-title h2,
+    .card-title h3{
+      margin:0;
+      font-size:15px;
+      font-weight:700;
+      color:#eef4ff
+    }
+    .tiny{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .hero-media{
+      position:relative;
+      min-height:280px;
+      background:rgba(255,255,255,0.04);
+    }
+    .hero-media img{
+      width:100%;
+      height:100%;
+      min-height:280px;
+      object-fit:cover;
+      display:block;
+      filter:saturate(1.03) contrast(1.04);
+    }
+    .hero-overlay{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      padding:16px;
+      background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
+    }
+    .hero-overlay h2{
+      margin:0 0 8px;
+      font-size:22px;
+      font-weight:700;
+      color:#ff6a78
+    }
+    .hero-overlay p{
+      margin:0;
+      font-size:13px;
+      color:rgba(255,255,255,.86);
+      max-width:85%;
+    }
+
+    .critical-wrap,
+    .thumb{
+      position:relative;
+      overflow:hidden;
+      background:rgba(255,255,255,0.05);
+    }
+    .critical-wrap img,
+    .thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .spinner{
+      position:absolute;
+      right:10px;
+      top:10px;
+      width:11px;
+      height:11px;
+      border-radius:50%;
+      background:rgba(255,255,255,.3);
+      animation:pulse 1.1s infinite ease-in-out;
+      z-index:2;
+    }
+    .loaded .spinner,
+    .error .spinner{display:none;}
+    .error::after{
+      content:"image error";
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(0,0,0,.45);
+      color:#ff96a0;
+      border:1px solid rgba(255,106,120,.35);
+      z-index:2;
+    }
+    @keyframes pulse{
+      0%{transform:scale(1);opacity:.68}
+      50%{transform:scale(1.55);opacity:1}
+      100%{transform:scale(1);opacity:.68}
+    }
+
+    .hero-side{
+      display:grid;
+      grid-template-rows: 1fr 1fr;
+      gap:14px;
+    }
+    .mini-stat{
+      display:grid;
+      grid-template-columns: 84px 1fr;
+      gap:12px;
+      align-items:center;
+    }
+    .mini-stat .thumb{
+      height:84px;
+      border-radius:16px;
+      border:1px solid var(--line);
+    }
+    .mini-stat h4{
+      margin:0 0 6px;
+      font-size:14px;
+      color:#eef4ff
+    }
+    .mini-stat p{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 270px 1fr 320px;
+      gap:16px;
+      align-items:start;
+    }
+
+    .side-list,
+    .news-list,
+    .doc-list,
+    .grid-cards{
+      display:grid;
+      gap:10px;
+    }
+
+    .list-item{
+      padding:12px 13px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.04);
+      font-size:13px;
+      color:var(--fg);
+    }
+
+    .list-item .muted,
+    .doc-meta,
+    .news-meta{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+    }
+
+    .module.loading .module-body{
+      color:var(--muted);
+      min-height:90px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:13px;
+      background:rgba(255,255,255,0.03);
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,0.08);
+      padding:14px;
+    }
+
+    .content-feed{
+      display:grid;
+      gap:16px;
+    }
+    .content-feed h3{
+        color:#eef4ff
+    }
+
+    .feed-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    .feed-card{
+      overflow:hidden;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.04);
+    }
+    .feed-card .thumb{
+      height:140px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .feed-card .body{
+      padding:12px;
+    }
+    .feed-card h4{
+      margin:0 0 6px;
+      font-size:14px;
+      line-height:1.4;
+    }
+    .feed-card p{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .statusbar{
+      margin-top:16px;
+      padding:14px 16px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.03));
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      box-shadow:var(--shadow);
+    }
+    .status-left{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:1 1 auto;
+      min-width:260px;
+    }
+    .status-line{
+      font-size:13px;
+      color:var(--muted);
+      white-space:pre-line;
+    }
+    .progress{
+      height:10px;
+      background:rgba(255,255,255,.08);
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .progress > div{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(77,163,255,0.95), rgba(65,211,155,0.92));
+      border-radius:999px;
+      transition:width .18s ease;
+    }
+    .controls{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-end;
+    }
+
+    .footer-area{
+      margin-top:18px;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.75;
+    }
+
+    .game-overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,0.8);
+      z-index:9999;
+      padding:16px;
+    }
+    .panel{
+      width:min(920px, 95vw);
+      border-radius:20px;
+      background:rgba(12,18,36,.96);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 30px 80px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .panel-head .h{
+      font-weight:700;
+      font-size:15px;
+      margin:0;
+    }
+    .panel-head .mini{
+      font-size:12px;
+      color:var(--muted);
+      white-space:pre-line;
+      text-align:right;
+    }
+    .panel-body{
+      padding:16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    .block{
+      border-radius:16px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      padding:14px;
+    }
+    .block-title{
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 8px;
+    }
+    .number{
+      font-size:68px;
+      font-weight:700;
+      letter-spacing:12px;
+      text-align:center;
+      margin:10px 0 14px;
+    }
+    .input-row{
+      display:flex;
+      gap:8px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .input-row input{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.25);
+      color:var(--fg);
+      outline:none;
+      min-width:240px;
+      text-align:center;
+      font-size:16px;
+    }
+    .input-row button{
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      cursor:pointer;
+      font-size:13px;
+      background:rgba(255,255,255,.08);
+      color:var(--fg);
+    }
+    .input-row button.primary{
+      background:var(--accent);
+      border-color:rgba(77,163,255,0.55);
+      color:#fff;
+    }
+    .feedback{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      font-size:12px;
+      line-height:1.48;
+      white-space:pre-wrap;
+      color:rgba(238,244,255,.92);
+      min-height:320px;
+    }
+
+    @media (max-width: 1180px){
+      .layout{grid-template-columns: 1fr;}
+      .hero{grid-template-columns:1fr;}
+      .feed-grid{grid-template-columns: repeat(2, 1fr);}
+    }
+    @media (max-width: 760px){
+      .searchbar{grid-template-columns:1fr;}
+      .panel-body{grid-template-columns:1fr;}
+      .feed-grid{grid-template-columns:1fr;}
+      .statusbar{flex-direction:column;}
+      .controls{align-items:stretch;}
+      .badges{justify-content:flex-start;}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <h1>Dissertation Test</h1>
+        <div class="sub">Welcome, this is a test website</div>
+      </div>
+
+      <div class="badges">
+        <div class="badge-like" id="badge-level">Level: -</div>
+        <div class="badge-like" id="badge-budget">Budget: -</div>
+        <div class="badge-like" id="badge-remaining">Remaining: -</div>
+        <div class="badge-like" id="badge-state">State: loading</div>
+      </div>
+
+      <div class="top-progress" aria-label="top load progress">
+        <div class="top-progress-bar" id="top-progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <main class="page">
+    <div class="searchbar">
+      <input id="fake-search-input" placeholder="Enter keywords to search (simulate slow response)" />
+      <button class="btn-like primary" id="fake-search-btn">Search</button>
+      <button class="btn-like warn" id="fake-filter-btn">Filter</button>
+    </div>
+
+    <section class="hero">
+      <div class="card critical-wrap" id="critical-wrap-1">
+        <span class="spinner"></span>
+        <div class="hero-media">
+          <img class="critical" data-idx="1" data-role="hero" alt="hero banner">
+          <div class="hero-overlay">
+            <h2>Homepage Image</h2>
+            <p>This website is for dissertation purposes only</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-side">
+        <div class="card card-pad">
+          <div class="card-title">
+            <h3>This is a section</h3>
+            <span class="tiny">Overview</span>
+          </div>
+
+          <div class="mini-stat">
+            <div class="thumb critical-wrap" id="critical-wrap-2">
+              <span class="spinner"></span>
+              <img class="critical" data-idx="2" data-role="thumb" alt="thumb 1">
+            </div>
+            <div>
+              <h4>This is an image</h4>
+              <p>Used to simulate a real website</p>
+            </div>
+          </div>
+
+          <div style="height:10px"></div>
+
+          <div class="mini-stat">
+            <div class="thumb critical-wrap" id="critical-wrap-3">
+              <span class="spinner"></span>
+              <img class="critical" data-idx="3" data-role="thumb" alt="thumb 2">
+            </div>
+            <div>
+              <h4>This is another image</h4>
+              <p>Take your time loading</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <div class="card-title">
+            <h3>Above-the-fold Card</h3>
+            <span class="tiny">Critical</span>
+          </div>
+
+          <div class="mini-stat">
+            <div class="thumb critical-wrap" id="critical-wrap-4">
+              <span class="spinner"></span>
+              <img class="critical" data-idx="4" data-role="thumb" alt="thumb 3">
+            </div>
+            <div>
+              <h4>Image 1</h4>
+              <p>This is a critical image that must be loaded</p>
+            </div>
+          </div>
+
+          <div style="height:10px"></div>
+
+          <div class="mini-stat">
+            <div class="thumb critical-wrap" id="critical-wrap-5">
+              <span class="spinner"></span>
+              <img class="critical" data-idx="5" data-role="thumb" alt="thumb 4">
+            </div>
+            <div>
+              <h4>Image 2</h4>
+              <p>The second one</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <aside class="content-feed">
+        <section class="card card-pad module loading" id="module-nav">
+          <div class="card-title">
+            <h3>Category Navigation</h3>
+            <span class="tiny">Module A</span>
+          </div>
+          <div class="module-body">Loading category navigation...</div>
+        </section>
+
+        <section class="card card-pad module loading" id="module-quick">
+          <div class="card-title">
+            <h3>Quick Access</h3>
+            <span class="tiny">Module B</span>
+          </div>
+          <div class="module-body">Loading quick access...</div>
+        </section>
+      </aside>
+
+      <section class="content-feed">
+        <section class="card card-pad module loading" id="module-news">
+          <div class="card-title">
+            <h3>Recommended Content</h3>
+            <span class="tiny">Module C</span>
+          </div>
+          <div class="module-body">Loading recommended content...</div>
+        </section>
+
+        <section class="card card-pad module loading" id="module-gallery">
+          <div class="card-title">
+            <h3>Image and Text Cards</h3>
+            <span class="tiny">Module D</span>
+          </div>
+          <div class="module-body">Loading image and text cards...</div>
+        </section>
+      </section>
+
+      <aside class="content-feed">
+        <section class="card card-pad module loading" id="module-docs">
+          <div class="card-title">
+            <h3>Downloads and Attachments</h3>
+            <span class="tiny">Module E</span>
+          </div>
+          <div class="module-body">Loading attachment information...</div>
+        </section>
+
+        <section class="card card-pad module loading" id="module-sidefeed">
+          <div class="card-title">
+            <h3>Hot Topics and Recommendations</h3>
+            <span class="tiny">Module F</span>
+          </div>
+          <div class="module-body">Loading sidebar recommendations...</div>
+        </section>
+      </aside>
+    </section>
+
+    <div class="statusbar">
+      <div class="status-left">
+        <div class="status-line" id="status-line">Waiting for critical above-the-fold resources and modules to finish loading...</div>
+        <div class="progress" aria-label="load progress">
+          <div id="progress-bar"></div>
+        </div>
+        <div class="status-line" id="status-hint">
+          Hint: the next level will refresh the page
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn-like" id="restart-page">Restart (Level 1)</button>
+        <button class="btn-like primary" id="force-start" disabled>Force Start (Debug)</button>
+      </div>
+    </div>
+
+    <div class="footer-area">
+      This page is a generic unoptimized website model for experimental use.
+    </div>
+  </main>
+
+  <div class="game-overlay" id="game-overlay">
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="h" id="panel-title">Waiting for loading to complete...</div></div>
+        <div class="mini" id="panel-mini">-</div>
+      </div>
+
+      <div class="panel-body">
+        <div class="block">
+          <div class="block-title">Number Display</div>
+          <div class="number" id="game-number">---</div>
+
+          <div class="input-row" id="input-row" style="display:none;">
+            <input id="guess-input" placeholder="Please enter the 3-digit number you just saw" />
+            <button class="primary" id="submit-btn">Submit</button>
+            <button id="close-btn" style="display:none;">Close</button>
+            <button id="restart-btn" style="display:none;">Restart (Level 1)</button>
+            <button id="next-btn" style="display:none;">Next Level</button>
+          </div>
+
+          <div class="status-line" id="game-status" style="margin-top:10px;color:var(--muted);white-space:pre-line;"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">Full Feedback</div>
+          <div class="feedback" id="feedback">(Complete information will be shown here after the game ends)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function getIntParam(name, fallback){
+  var params = new URLSearchParams(window.location.search);
+  var v = parseInt(params.get(name), 10);
+  return isNaN(v) ? fallback : v;
+}
+function getStrParam(name, fallback){
+  var params = new URLSearchParams(window.location.search);
+  var v = params.get(name);
+  return (v == null || v === "") ? fallback : v;
+}
+
+var level = getIntParam("level", 1);
+if (level < 1) level = 1;
+var run = getStrParam("run", String(Date.now()));
+
+//故意做一点主线程阻塞
+(function heavySyncTask(){
+  var temp = [];
+  for (var round = 0; round < 18; round++){
+    for (var i = 0; i < 2600; i++){
+      temp.push("node-" + round + "-" + i);
+    }
+  }
+  temp.reverse();
+  window.__dummyInitSize = temp.length;
+})();
+
+function expBudget(level, startMs, ratio, minMs){
+  var raw = startMs * Math.pow(ratio, level - 1);
+  return Math.max(minMs, Math.round(raw));
+}
+var levelTimeLimit = expBudget(level, 7000, 0.8, 500);
+var idealDisplayTime = expBudget(level, 1000, 0.90, 150);
+
+var navEntry = performance.getEntriesByType("navigation")[0];
+var navStartTime = navEntry ? navEntry.startTime : 0;
+
+//badges
+var badgeLevel = document.getElementById("badge-level");
+var badgeBudget = document.getElementById("badge-budget");
+var badgeRemaining = document.getElementById("badge-remaining");
+var badgeState = document.getElementById("badge-state");
+
+badgeLevel.textContent = "Level: " + level;
+badgeBudget.textContent = "Budget: " + levelTimeLimit + "ms";
+badgeRemaining.textContent = "Remaining: ...";
+badgeState.textContent = "State: loading";
+
+//statistics
+var STATS_KEY = "slow_site_game_stats_v1";
+
+function loadStats(){
+  try{
+    var raw = localStorage.getItem(STATS_KEY);
+    if(!raw) return { totalDisplayMs: 0, displayCount: 0, maxLevelReached: 0 };
+    var s = JSON.parse(raw);
+    return {
+      totalDisplayMs: Number(s.totalDisplayMs) || 0,
+      displayCount: Number(s.displayCount) || 0,
+      maxLevelReached: Number(s.maxLevelReached) || 0
+    };
+  }catch(e){
+    return { totalDisplayMs: 0, displayCount: 0, maxLevelReached: 0 };
+  }
+}
+function saveStats(s){
+  try{ localStorage.setItem(STATS_KEY, JSON.stringify(s)); }catch(e){}
+}
+function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull){
+  var s = loadStats();
+  s.maxLevelReached = Math.max(s.maxLevelReached, currentLevel);
+  if (typeof actualDisplayTimeOrNull === "number" && isFinite(actualDisplayTimeOrNull) && actualDisplayTimeOrNull > 0){
+    s.totalDisplayMs += actualDisplayTimeOrNull;
+    s.displayCount += 1;
+  }
+  saveStats(s);
+  return s;
+}
+
+//network
+var deviceInfo = {
+  hardwareConcurrency: navigator.hardwareConcurrency || "N/A",
+  deviceMemory: navigator.deviceMemory || "N/A",
+  userAgent: navigator.userAgent
+};
+var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || null;
+var networkRTT = conn && typeof conn.rtt === "number" ? conn.rtt : "N/A";
+var networkDownlink = conn && typeof conn.downlink === "number" ? conn.downlink : "N/A";
+var effectiveType = conn && conn.effectiveType ? conn.effectiveType : "N/A";
+
+//critical resources
+var criticalNodes = document.querySelectorAll("img.critical");
+var criticalTarget = criticalNodes.length; // 当前共 5 张关键图
+var moduleTarget = 4; // 6个模块里达到4个即可开始
+var statusLine = document.getElementById("status-line");
+var progressBar = document.getElementById("progress-bar");
+var topProgressBar = document.getElementById("top-progress-bar");
+var forceStartBtn = document.getElementById("force-start");
+
+var criticalLoadedCount = 0;
+var moduleLoadedCount = 0;
+var gameEnded = false;
+var gateTriggered = false;
+var deferredNoTimeShown = false;
+
+var imgMetrics = [];
+for (var i = 0; i < criticalNodes.length; i++){
+  imgMetrics.push({
+    idx: i + 1,
+    status: "pending",
+    endMs: null,
+    role: criticalNodes[i].getAttribute("data-role") || "critical"
+  });
+}
+
+function currentGateScore(){
+  return criticalLoadedCount + moduleLoadedCount;
+}
+function gateTotal(){
+  return criticalTarget + moduleTarget;
+}
+function updateProgress(){
+  var pct = Math.round((currentGateScore() / gateTotal()) * 100);
+  progressBar.style.width = pct + "%";
+  if (topProgressBar) topProgressBar.style.width = pct + "%";
+
+  statusLine.textContent =
+    "Waiting for critical above-the-fold resources and modules to finish loading...\n" +
+    "Critical images: " + criticalLoadedCount + "/" + criticalTarget +
+    " | Modules: " + moduleLoadedCount + "/" + moduleTarget +
+    " | Total progress: " + pct + "%";
+}
+function markCriticalWrap(idx, ok){
+  var wrap = document.getElementById("critical-wrap-" + idx);
+  if (!wrap) return;
+  wrap.classList.add(ok ? "loaded" : "error");
+}
+function finalizeImage(idx, ok){
+  if (imgMetrics[idx - 1].status !== "pending") return;
+  imgMetrics[idx - 1].status = ok ? "load" : "error";
+  imgMetrics[idx - 1].endMs = performance.now() - navStartTime;
+  criticalLoadedCount++;
+  markCriticalWrap(idx, ok);
+  updateProgress();
+  tryTriggerGate();
+}
+
+/* =========================
+   7) 模拟慢图片加载
+========================= */
+function makeImageUrl(seed, w, h){
+  return "https://picsum.photos/" + w + "/" + h + "?random=" + seed + "&lv=" + encodeURIComponent(level) + "&run=" + encodeURIComponent(run);
+}
+
+function loadCriticalImage(img, idx){
+  var artificialDelay = 450 + idx * 180 + (level - 1) * 90;
+  var url = (idx === 1)
+    ? makeImageUrl(100 + idx, 1600, 900)
+    : makeImageUrl(100 + idx, 800, 800);
+
+  setTimeout(function(){
+    img.src = url;
+  }, artificialDelay);
+
+  img.addEventListener("load", function(){ finalizeImage(idx, true); }, { once:true });
+  img.addEventListener("error", function(){ finalizeImage(idx, false); }, { once:true });
+}
+
+for (var j = 0; j < criticalNodes.length; j++){
+  loadCriticalImage(criticalNodes[j], j + 1);
+}
+updateProgress();
+
+var moduleMetrics = [];
+function recordModuleLoaded(id){
+  moduleLoadedCount++;
+  moduleMetrics.push({
+    id: id,
+    loadedAt: Math.round(performance.now() - navStartTime)
+  });
+  updateProgress();
+  tryTriggerGate();
+}
+
+function fakeModuleLoad(id, delay, html){
+  setTimeout(function(){
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove("loading");
+    var body = el.querySelector(".module-body");
+    if (body) body.innerHTML = html;
+    recordModuleLoaded(id);
+  }, delay);
+}
+
+var baseModuleDelay = 700 + (level - 1) * 120;
+
+fakeModuleLoad("module-nav", baseModuleDelay + 0,
+  '<div class="side-list">' +
+    '<div class="list-item">Main Homepage<div class="muted">Entry loaded</div></div>' +
+    '<div class="list-item">Recommended Channel<div class="muted">Category module</div></div>' +
+    '<div class="list-item">Latest Updates<div class="muted">Navigation index</div></div>' +
+    '<div class="list-item">Site Topics<div class="muted">Auxiliary entry</div></div>' +
+  '</div>'
+);
+
+fakeModuleLoad("module-quick", baseModuleDelay + 500,
+  '<div class="side-list">' +
+    '<div class="list-item">Quick Access A<div class="muted">Some content loads slowly</div></div>' +
+    '<div class="list-item">Quick Access B<div class="muted">Simulating an old portal site</div></div>' +
+    '<div class="list-item">Quick Access C<div class="muted">This is a quick access entry</div></div>' +
+  '</div>'
+);
+
+fakeModuleLoad("module-news", baseModuleDelay + 900,
+  '<div class="news-list">' +
+    '<div class="list-item"><strong>Recommended Content 01</strong><div class="news-meta">Computer Python tutorial</div></div>' +
+    '<div class="list-item"><strong>Recommended Content 02</strong><div class="news-meta">Java from graduation to unemployment</div></div>' +
+    '<div class="list-item"><strong>Recommended Content 03</strong><div class="news-meta">Ruby language introduction</div></div>' +
+  '</div>'
+);
+
+fakeModuleLoad("module-gallery", baseModuleDelay + 1400,
+  '<div class="feed-grid">' +
+    makeFeedCard(6, "Generic Slow Website Card A", "Image 1") +
+    makeFeedCard(7, "Generic Slow Website Card B", "Image 2") +
+    makeFeedCard(8, "Generic Slow Website Card C", "Image 3") +
+    makeFeedCard(9, "Generic Slow Website Card D", "Image 4") +
+    makeFeedCard(10, "Generic Slow Website Card E", "Image 5") +
+    makeFeedCard(11, "Generic Slow Website Card F", "Image 67") +
+  '</div>'
+);
+
+fakeModuleLoad("module-docs", baseModuleDelay + 1900,
+  '<div class="doc-list">' +
+    '<div class="list-item"><strong>Attachment Notes.pdf</strong><div class="doc-meta">Simulating slow loading in document and download sections</div></div>' +
+    '<div class="list-item"><strong>Resource List.xlsx</strong><div class="doc-meta">A common attachment module in old systems</div></div>' +
+    '<div class="list-item"><strong>History Records.zip</strong><div class="doc-meta">Not above the fold, but it extends full-page completion time</div></div>' +
+  '</div>'
+);
+
+fakeModuleLoad("module-sidefeed", baseModuleDelay + 2400,
+  '<div class="side-list">' +
+    '<div class="list-item">Trending Recommendation 1<div class="muted">Visible to users but arrives late</div></div>' +
+    '<div class="list-item">Trending Recommendation 2<div class="muted">Typical unoptimized page experience</div></div>' +
+    '<div class="list-item">Trending Recommendation 3<div class="muted">Page content does not finish synchronously</div></div>' +
+  '</div>'
+);
+
+function makeFeedCard(seed, title, desc){
+  var src = makeImageUrl(seed, 800, 520);
+  return '' +
+    '<article class="feed-card">' +
+      '<div class="thumb"><img src="' + src + '" alt="' + title + '"></div>' +
+      '<div class="body">' +
+        '<h4>' + title + '</h4>' +
+        '<p>' + desc + '</p>' +
+      '</div>' +
+    '</article>';
+}
+
+var countdownTimer = null;
+var timeUp = false;
+var timeUpAt = null;
+var loadCountdownFrozen = false;
+var frozenRemainingMs = null;
+
+function getLoadRemainingMs(){
+  if (loadCountdownFrozen) return frozenRemainingMs;
+  var elapsed = performance.now() - navStartTime;
+  return Math.max(0, Math.round(levelTimeLimit - elapsed));
+}
+function freezeLoadCountdown(){
+  if (loadCountdownFrozen) return;
+  loadCountdownFrozen = true;
+  frozenRemainingMs = getLoadRemainingMs();
+  if (countdownTimer){
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+  badgeRemaining.textContent = "Remaining(load): " + frozenRemainingMs + "ms";
+}
+function startLoadCountdown(){
+  if (countdownTimer) return;
+  countdownTimer = setInterval(function(){
+    var remaining = getLoadRemainingMs();
+    badgeRemaining.textContent = "Remaining(load): " + remaining + "ms";
+    if (remaining <= 0 && !timeUp && !gameEnded){
+      timeUp = true;
+      timeUpAt = performance.now() - navStartTime;
+      badgeState.textContent = "State: load_time_up_deferred";
+    }
+  }, 50);
+}
+startLoadCountdown();
+
+function tryTriggerGate(){
+  if (gateTriggered || gameEnded) return;
+
+  if (criticalLoadedCount >= criticalTarget && moduleLoadedCount >= moduleTarget){
+    gateTriggered = true;
+    forceStartBtn.disabled = false;
+    freezeLoadCountdown();
+    badgeState.textContent = "State: ready";
+    onGateReady();
+  }
+}
+
+var metrics = {
+  level: level,
+  run: run,
+  levelTimeLimit: levelTimeLimit,
+  idealDisplayTime: idealDisplayTime,
+  navStartTime: navStartTime,
+
+  gateReadyAt: null,
+  loadDurationAtGate: null,
+
+  actualDisplayTime: null,
+  numberShownAt: null,
+  numberHiddenAt: null,
+
+  userSubmitAt: null,
+  userGuess: null,
+  result: null,
+
+  criticalLoadedCount: 0,
+  moduleLoadedCount: 0,
+  imgMetrics: imgMetrics,
+  moduleMetrics: moduleMetrics
+};
+
+/* =========================
+   11) 游戏逻辑
+========================= */
+var gameOverlay = document.getElementById("game-overlay");
+var panelTitle = document.getElementById("panel-title");
+var panelMini = document.getElementById("panel-mini");
+var gameNumber = document.getElementById("game-number");
+var gameStatus = document.getElementById("game-status");
+var inputRow = document.getElementById("input-row");
+var guessInput = document.getElementById("guess-input");
+var submitBtn = document.getElementById("submit-btn");
+var closeBtn = document.getElementById("close-btn");
+var restartBtn = document.getElementById("restart-btn");
+var nextBtn = document.getElementById("next-btn");
+var feedbackEl = document.getElementById("feedback");
+
+var currentCode = "";
+
+function generateCode(){
+  currentCode = Math.floor(100 + Math.random() * 900).toString();
+}
+function showOverlayBase(){
+  gameOverlay.style.display = "flex";
+  inputRow.style.display = "flex";
+  closeBtn.style.display = "inline-block";
+}
+function onGateReady(){
+  if (gameEnded) return;
+
+  metrics.gateReadyAt = performance.now() - navStartTime;
+  metrics.loadDurationAtGate = metrics.gateReadyAt;
+  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.moduleLoadedCount = moduleLoadedCount;
+
+  var loadTooSlow = metrics.loadDurationAtGate > levelTimeLimit;
+  if (loadTooSlow){
+    metrics.result = "no_time_load";
+    badgeState.textContent = "State: load_time_up_after_gate";
+    showDeferredLoadNoTimeAfterGate();
+    return;
+  }
+
+  badgeState.textContent = "State: ready_to_play";
+  startGame();
+}
+
+function startGame(){
+  if (gameEnded || timeUp) return;
+
+  showOverlayBase();
+  submitBtn.style.display = "inline-block";
+  guessInput.style.display = "inline-block";
+  restartBtn.style.display = "none";
+  nextBtn.style.display = "none";
+
+  var now = performance.now();
+  var used = now - navStartTime;
+  var leftover = levelTimeLimit - used;
+
+  panelTitle.textContent = "Level " + level + ": Critical above-the-fold content is ready";
+  panelMini.textContent =
+    "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
+    "Used until gate: " + Math.round(used) + "ms\n" +
+    "Critical: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
+    "Modules: " + moduleLoadedCount + "/" + moduleTarget;
+
+  if (leftover <= 0){
+    endByNoTime();
+    return;
+  }
+
+  var actualDisplay = Math.min(idealDisplayTime, leftover);
+  metrics.actualDisplayTime = actualDisplay;
+
+  generateCode();
+  gameNumber.style.display = "block";
+  gameNumber.textContent = currentCode;
+  metrics.numberShownAt = performance.now() - navStartTime;
+
+  gameStatus.textContent =
+    "The number will be hidden soon. Please remember the 3-digit number.\n" +
+    "This experiment simulates a generic slow website, not just slow image loading.";
+
+  setTimeout(function(){
+    if (gameEnded) return;
+    gameNumber.style.display = "none";
+    guessInput.value = "";
+    guessInput.focus();
+    metrics.numberHiddenAt = performance.now() - navStartTime;
+    gameStatus.textContent = "Please enter the 3-digit number you just saw:";
+  }, actualDisplay);
+}
+
+function formatReport(){
+  var loadTime = metrics.loadDurationAtGate != null ? Math.round(metrics.loadDurationAtGate) : "N/A";
+  var avgStats = updateStatsAfterRound(level, metrics.actualDisplayTime);
+  var avgDisplay = avgStats.displayCount > 0
+    ? Math.round(avgStats.totalDisplayMs / avgStats.displayCount)
+    : "N/A";
+
+  var lines = [];
+  lines.push("===== Experiment Metrics =====");
+  lines.push("");
+  lines.push("LevelReached: " + level);
+  lines.push("Result: " + (metrics.result || "N/A"));
+  lines.push("LoadTime(ms): " + loadTime);
+  lines.push("ActualDisplayTime(ms): " + (metrics.actualDisplayTime != null ? Math.round(metrics.actualDisplayTime) : "N/A"));
+  lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
+  lines.push("CriticalLoadedAtGate: " + metrics.criticalLoadedCount + "/" + criticalTarget);
+  lines.push("ModulesLoadedAtGate: " + metrics.moduleLoadedCount + "/" + moduleTarget);
+  lines.push("");
+  lines.push("----- Device Performance -----");
+  lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);
+  lines.push("DeviceMemory(GB): " + deviceInfo.deviceMemory);
+  lines.push("Browser: " + deviceInfo.userAgent);
+  lines.push("");
+  lines.push("----- Network -----");
+  lines.push("RTT(ms): " + networkRTT);
+  lines.push("Downlink(Mb/s): " + networkDownlink);
+  lines.push("EffectiveType: " + effectiveType);
+  lines.push("");
+  lines.push("----- Critical Image Metrics -----");
+  for (var i = 0; i < metrics.imgMetrics.length; i++){
+    var m = metrics.imgMetrics[i];
+    lines.push("IMG" + m.idx + ": " + m.status + " @ " + (m.endMs != null ? Math.round(m.endMs) + "ms" : "N/A"));
+  }
+  lines.push("");
+  lines.push("----- Module Metrics -----");
+  for (var j = 0; j < moduleMetrics.length; j++){
+    lines.push(moduleMetrics[j].id + ": " + moduleMetrics[j].loadedAt + "ms");
+  }
+  return lines.join("\n");
+}
+
+function finishRound(result){
+  if (gameEnded) return;
+  gameEnded = true;
+  metrics.result = result;
+
+  submitBtn.style.display = "none";
+  guessInput.style.display = "none";
+  closeBtn.style.display = "inline-block";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "inline-block";
+
+  if (result === "correct"){
+    nextBtn.style.display = "inline-block";
+    restartBtn.style.display = "none";
+  }
+
+  badgeState.textContent = "State: finished(" + result + ")";
+
+  try{
+    feedbackEl.textContent = formatReport();
+  }catch(e){
+    feedbackEl.textContent =
+      "ReportError: " + (e && e.message ? e.message : String(e)) + "\n" +
+      "Result: " + result;
+    console.error("[finishRound] formatReport failed:", e);
+  }
+}
+
+function showDeferredLoadNoTimeAfterGate(){
+  if (deferredNoTimeShown || gameEnded) return;
+  deferredNoTimeShown = true;
+
+  showOverlayBase();
+  panelTitle.textContent = "End: Load phase timeout";
+  panelMini.textContent =
+    "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
+    "Gate finished at: " + Math.round(metrics.gateReadyAt) + "ms\n" +
+    "Time up first observed at: " + (timeUpAt != null ? Math.round(timeUpAt) + "ms" : "N/A");
+
+  gameNumber.textContent = "— — —";
+  gameNumber.style.display = "block";
+
+  gameStatus.textContent =
+    "This experiment only evaluates the waiting experience before critical above-the-fold loading is completed.\n" +
+    "When the gate was reached, the loading time had already exceeded the budget, so it is judged as a load-phase timeout.";
+
+  submitBtn.style.display = "none";
+  guessInput.style.display = "none";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "inline-block";
+
+  metrics.actualDisplayTime = null;
+  finishRound("no_time_load");
+}
+
+function endByNoTime(){
+  showOverlayBase();
+  panelTitle.textContent = "End: Not enough time";
+  panelMini.textContent = "Budget(Time Budget): " + levelTimeLimit + "ms";
+  gameNumber.textContent = "— — —";
+  gameNumber.style.display = "block";
+  gameStatus.textContent = "There is not enough time left in this level to display the number.";
+  submitBtn.style.display = "none";
+  guessInput.style.display = "none";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "inline-block";
+  metrics.actualDisplayTime = null;
+  finishRound("no_time");
+}
+
+submitBtn.addEventListener("click", function(){
+  if (gameEnded) return;
+  var guess = guessInput.value.trim();
+  if (!guess) return;
+
+  metrics.userGuess = guess;
+  metrics.userSubmitAt = performance.now() - navStartTime;
+
+  if (guess === currentCode){
+    panelTitle.textContent = "Passed: Correct answer";
+    gameStatus.textContent = "You answered correctly. You may proceed to the next level (the page will refresh and simulate slow loading again).";
+    finishRound("correct");
+  } else {
+    panelTitle.textContent = "End: Wrong answer";
+    gameStatus.textContent = "You answered incorrectly. This experiment is over.";
+    finishRound("wrong");
+  }
+});
+
+guessInput.addEventListener("keydown", function(e){
+  if (e.key === "Enter") submitBtn.click();
+});
+
+closeBtn.addEventListener("click", function(){
+  gameOverlay.style.display = "none";
+});
+
+restartBtn.addEventListener("click", function(){
+  try{ localStorage.removeItem(STATS_KEY); }catch(e){}
+  var url = new URL(window.location.href);
+  url.searchParams.set("level", 1);
+  url.searchParams.set("run", String(Date.now()));
+  window.location.href = url.toString();
+});
+
+nextBtn.addEventListener("click", function(){
+  var url = new URL(window.location.href);
+  url.searchParams.set("level", level + 1);
+  url.searchParams.set("run", String(Date.now()));
+  window.location.href = url.toString();
+});
+
+document.getElementById("restart-page").addEventListener("click", function(){
+  try{ localStorage.removeItem(STATS_KEY); }catch(e){}
+  var url = new URL(window.location.href);
+  url.searchParams.set("level", 1);
+  url.searchParams.set("run", String(Date.now()));
+  window.location.href = url.toString();
+});
+
+forceStartBtn.addEventListener("click", function(){
+  if (gameEnded || timeUp) return;
+
+  for (var i = 0; i < imgMetrics.length; i++){
+    if (imgMetrics[i].status === "pending"){
+      imgMetrics[i].status = "forced";
+      imgMetrics[i].endMs = performance.now() - navStartTime;
+      criticalLoadedCount++;
+      markCriticalWrap(i + 1, false);
+    }
+  }
+
+  while (moduleLoadedCount < moduleTarget){
+    moduleLoadedCount++;
+  }
+
+  updateProgress();
+  freezeLoadCountdown();
+  badgeState.textContent = "State: forced";
+  metrics.gateReadyAt = performance.now() - navStartTime;
+  metrics.loadDurationAtGate = metrics.gateReadyAt;
+  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.moduleLoadedCount = moduleLoadedCount;
+  startGame();
+});
+
+document.getElementById("fake-search-btn").addEventListener("click", function(){
+  var btn = this;
+  if (btn.disabled) return;
+  btn.disabled = true;
+  var old = btn.textContent;
+  btn.textContent = "Searching...";
+  badgeState.textContent = "State: interaction_wait";
+  setTimeout(function(){
+    btn.disabled = false;
+    btn.textContent = old;
+    if (!gameEnded && !gateTriggered) badgeState.textContent = "State: loading";
+    else if (!gameEnded && gateTriggered) badgeState.textContent = "State: ready_to_play";
+    alert("Search results have been updated (simulated slow response)");
+  }, 1200 + (level - 1) * 120);
+});
+
+document.getElementById("fake-filter-btn").addEventListener("click", function(){
+  var btn = this;
+  if (btn.disabled) return;
+  btn.disabled = true;
+  var old = btn.textContent;
+  btn.textContent = "Processing...";
+  setTimeout(function(){
+    btn.disabled = false;
+    btn.textContent = old;
+    alert("Filter conditions have been applied (simulated slow interaction)");
+  }, 900 + (level - 1) * 100);
+});
+</script>
+</body>
+</html>

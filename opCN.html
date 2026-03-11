@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>毕设实验网站 - 首屏优化版（无 Preload）</title>
+
+  <!-- 仅保留连接优化，不使用 preload -->
+  <link rel="preconnect" href="https://picsum.photos" crossorigin>
+  <link rel="dns-prefetch" href="//picsum.photos">
+
+  <script>
+    function getIntParam(name, fallback){
+      var params = new URLSearchParams(window.location.search);
+      var v = parseInt(params.get(name), 10);
+      return isNaN(v) ? fallback : v;
+    }
+    function getStrParam(name, fallback){
+      var params = new URLSearchParams(window.location.search);
+      var v = params.get(name);
+      return (v == null || v === "") ? fallback : v;
+    }
+
+    var __level_pre = getIntParam("level", 1);
+    if (__level_pre < 1) __level_pre = 1;
+    var __run_pre = getStrParam("run", String(Date.now()));
+
+    function makeImageUrl(seed, w, h){
+      return "https://picsum.photos/" + w + "/" + h + "?random=" + seed + "&lv=" + encodeURIComponent(__level_pre) + "&run=" + encodeURIComponent(__run_pre);
+    }
+  </script>
+
+  <style>
+    :root{
+      --bg:#0a1020;
+      --panel:#121a2d;
+      --panel2:#16213b;
+      --fg:#eef4ff;
+      --muted:rgba(238,244,255,0.72);
+      --line:rgba(255,255,255,0.10);
+      --accent:#4da3ff;
+      --ok:#41d39b;
+      --danger:#ff6a78;
+      --warn:#f5be4f;
+      --shadow:0 18px 42px rgba(0,0,0,0.35);
+    }
+
+    *{box-sizing:border-box;}
+    html,body{
+      margin:0;
+      padding:0;
+      background:linear-gradient(180deg,#09101d 0%, #0b1222 100%);
+      color:var(--fg);
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    }
+    body{min-height:100vh; overflow:auto;}
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(10,16,32,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width:1280px;
+      margin:0 auto;
+      padding:14px 18px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      position:relative;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .badges{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .badge-like{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.06);
+      border:1px solid var(--line);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .top-progress{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:4px;
+      background:rgba(255,255,255,0.07);
+      overflow:hidden;
+    }
+    .top-progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(77,163,255,0.95), rgba(65,211,155,0.95));
+      transition:width .18s ease;
+    }
+
+    .page{
+      max-width:1280px;
+      margin:0 auto;
+      padding:18px;
+    }
+
+    .searchbar{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      margin-bottom:16px;
+    }
+    .searchbar input{
+      background:rgba(255,255,255,0.06);
+      border:1px solid var(--line);
+      color:var(--fg);
+      border-radius:14px;
+      padding:12px 14px;
+      outline:none;
+    }
+    .btn-like{
+      border:none;
+      padding:11px 15px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.08);
+      color:var(--fg);
+      cursor:pointer;
+      font-size:13px;
+      border:1px solid rgba(255,255,255,0.14);
+    }
+    .btn-like.primary{
+      background:var(--accent);
+      color:#fff;
+      border-color:rgba(77,163,255,0.55);
+    }
+    .btn-like.warn{
+      background:rgba(245,190,79,0.16);
+      border-color:rgba(245,190,79,0.35);
+      color:#ffe29a;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap:14px;
+      margin-bottom:16px;
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.035));
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card-pad{padding:16px;}
+    .card-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .card-title h2,
+    .card-title h3{
+      margin:0;
+      font-size:15px;
+      font-weight:700;
+      color:#eef4ff;
+    }
+    .tiny{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .critical-wrap,
+    .thumb{
+      position:relative;
+      overflow:hidden;
+      background:rgba(255,255,255,0.05);
+    }
+
+    .hero-media{
+      position:relative;
+      min-height:300px;
+      background:rgba(255,255,255,0.04);
+    }
+    .hero-media img{
+      width:100%;
+      height:100%;
+      min-height:300px;
+      object-fit:cover;
+      display:block;
+    }
+    .hero-overlay{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      padding:16px;
+      background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.58) 100%);
+    }
+    .hero-overlay h2{
+      margin:0 0 8px;
+      font-size:22px;
+      font-weight:700;
+      color:#ff6a78;
+    }
+    .hero-overlay p{
+      margin:0;
+      font-size:13px;
+      color:rgba(255,255,255,.88);
+      max-width:85%;
+    }
+
+    .critical-wrap img,
+    .thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .spinner{
+      position:absolute;
+      right:10px;
+      top:10px;
+      width:11px;
+      height:11px;
+      border-radius:50%;
+      background:rgba(255,255,255,.3);
+      animation:pulse 1.1s infinite ease-in-out;
+      z-index:2;
+    }
+    .loaded .spinner,
+    .error .spinner{display:none;}
+    .error::after{
+      content:"image error";
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(0,0,0,.45);
+      color:#ff96a0;
+      border:1px solid rgba(255,106,120,.35);
+      z-index:2;
+    }
+
+    @keyframes pulse{
+      0%{transform:scale(1);opacity:.68}
+      50%{transform:scale(1.55);opacity:1}
+      100%{transform:scale(1);opacity:.68}
+    }
+
+    .hero-side{
+      display:grid;
+      grid-template-rows: auto auto;
+      gap:14px;
+    }
+
+    .mini-stat{
+      display:grid;
+      grid-template-columns: 90px 1fr;
+      gap:12px;
+      align-items:center;
+    }
+    .mini-stat .thumb{
+      height:90px;
+      border-radius:16px;
+      border:1px solid var(--line);
+    }
+    .mini-stat h4{
+      margin:0 0 6px;
+      font-size:14px;
+      color:#eef4ff;
+    }
+    .mini-stat p{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    .first-screen-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .module.loading .module-body{
+      color:var(--muted);
+      min-height:100px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:13px;
+      background:rgba(255,255,255,0.03);
+      border-radius:14px;
+      border:1px dashed rgba(255,255,255,0.08);
+      padding:14px;
+    }
+
+    .list-block{
+      display:grid;
+      gap:10px;
+    }
+    .list-item{
+      padding:12px 13px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.04);
+      font-size:13px;
+      color:var(--fg);
+    }
+    .muted{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+    }
+
+    .statusbar{
+      margin-top:16px;
+      padding:14px 16px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.03));
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      box-shadow:var(--shadow);
+    }
+    .status-left{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      flex:1 1 auto;
+      min-width:260px;
+    }
+    .status-line{
+      font-size:13px;
+      color:var(--muted);
+      white-space:pre-line;
+    }
+    .progress{
+      height:10px;
+      background:rgba(255,255,255,.08);
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .progress > div{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(77,163,255,0.95), rgba(65,211,155,0.92));
+      border-radius:999px;
+      transition:width .18s ease;
+    }
+    .controls{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-end;
+    }
+
+    .hint-box{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(65,211,155,.22);
+      background:rgba(65,211,155,.08);
+      color:#dbfff1;
+      font-size:12px;
+      line-height:1.65;
+    }
+
+    .below-fold{
+      margin-top:28px;
+      display:grid;
+      gap:18px;
+    }
+
+    .lazy-section{
+      min-height:220px;
+    }
+
+    .placeholder-shell{
+      padding:16px;
+    }
+    .placeholder-title{
+      height:16px;
+      width:180px;
+      border-radius:999px;
+      background:rgba(255,255,255,0.08);
+      margin-bottom:14px;
+    }
+    .skeleton-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    .skeleton-card{
+      height:140px;
+      border-radius:16px;
+      background:linear-gradient(90deg,
+        rgba(255,255,255,0.05) 0%,
+        rgba(255,255,255,0.10) 50%,
+        rgba(255,255,255,0.05) 100%);
+      background-size:200% 100%;
+      animation: shimmer 1.8s infinite linear;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+    .skeleton-list{
+      display:grid;
+      gap:10px;
+    }
+    .skeleton-row{
+      height:52px;
+      border-radius:14px;
+      background:linear-gradient(90deg,
+        rgba(255,255,255,0.05) 0%,
+        rgba(255,255,255,0.10) 50%,
+        rgba(255,255,255,0.05) 100%);
+      background-size:200% 100%;
+      animation: shimmer 1.8s infinite linear;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+
+    @keyframes shimmer{
+      0%{background-position:200% 0;}
+      100%{background-position:-200% 0;}
+    }
+
+    .feed-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    .feed-card{
+      overflow:hidden;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.04);
+    }
+    .feed-card .thumb{
+      height:140px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .feed-card .body{
+      padding:12px;
+    }
+    .feed-card h4{
+      margin:0 0 6px;
+      font-size:14px;
+      line-height:1.4;
+    }
+    .feed-card p{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    .footer-area{
+      margin-top:18px;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.75;
+    }
+
+    .game-overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,0.8);
+      z-index:9999;
+      padding:16px;
+    }
+    .panel{
+      width:min(920px, 95vw);
+      border-radius:20px;
+      background:rgba(12,18,36,.96);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 30px 80px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .panel-head .h{
+      font-weight:700;
+      font-size:15px;
+      margin:0;
+    }
+    .panel-head .mini{
+      font-size:12px;
+      color:var(--muted);
+      white-space:pre-line;
+      text-align:right;
+    }
+    .panel-body{
+      padding:16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+    .block{
+      border-radius:16px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      padding:14px;
+    }
+    .block-title{
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 8px;
+    }
+    .number{
+      font-size:68px;
+      font-weight:700;
+      letter-spacing:12px;
+      text-align:center;
+      margin:10px 0 14px;
+    }
+    .input-row{
+      display:flex;
+      gap:8px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .input-row input{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.25);
+      color:var(--fg);
+      outline:none;
+      min-width:240px;
+      text-align:center;
+      font-size:16px;
+    }
+    .input-row button{
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      cursor:pointer;
+      font-size:13px;
+      background:rgba(255,255,255,.08);
+      color:var(--fg);
+    }
+    .input-row button.primary{
+      background:var(--accent);
+      border-color:rgba(77,163,255,0.55);
+      color:#fff;
+    }
+    .feedback{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      font-size:12px;
+      line-height:1.48;
+      white-space:pre-wrap;
+      color:rgba(238,244,255,.92);
+      min-height:320px;
+    }
+
+    @media (max-width: 1080px){
+      .hero{grid-template-columns:1fr;}
+      .first-screen-grid{grid-template-columns:1fr;}
+      .feed-grid{grid-template-columns:repeat(2,1fr);}
+      .skeleton-grid{grid-template-columns:repeat(2,1fr);}
+    }
+    @media (max-width: 760px){
+      .searchbar{grid-template-columns:1fr;}
+      .panel-body{grid-template-columns:1fr;}
+      .feed-grid{grid-template-columns:1fr;}
+      .skeleton-grid{grid-template-columns:1fr;}
+      .statusbar{flex-direction:column;}
+      .controls{align-items:stretch;}
+      .badges{justify-content:flex-start;}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <h1>毕设测试</h1>
+        <div class="sub">首屏优化版：非首屏内容在滚动后才加载（无 Preload）</div>
+      </div>
+
+      <div class="badges">
+        <div class="badge-like" id="badge-level">Level: -</div>
+        <div class="badge-like" id="badge-budget">Budget: -</div>
+        <div class="badge-like" id="badge-remaining">Remaining: -</div>
+        <div class="badge-like" id="badge-state">State: loading</div>
+      </div>
+
+      <div class="top-progress">
+        <div class="top-progress-bar" id="top-progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <main class="page">
+    <div class="searchbar">
+      <input id="fake-search-input" placeholder="输入关键词进行检索（首屏优化 / 滚动延迟加载版）" />
+      <button class="btn-like primary" id="fake-search-btn">搜索</button>
+    </div>
+
+    <section class="hero">
+      <div class="card critical-wrap" id="critical-wrap-1">
+        <span class="spinner"></span>
+        <div class="hero-media">
+          <img class="critical" data-idx="1" data-role="hero" alt="hero banner" width="1280" height="720" decoding="async" fetchpriority="high">
+          <div class="hero-overlay">
+            <h2>首页图片</h2>
+            <p>这个版本只保留首屏必要内容，非首屏内容会在用户滚动后才开始加载。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-side">
+        <div class="card card-pad">
+          <div class="card-title">
+            <h3>关键摘要</h3>
+            <span class="tiny">Critical Summary</span>
+          </div>
+
+          <div class="mini-stat">
+            <div class="thumb critical-wrap" id="critical-wrap-2">
+              <span class="spinner"></span>
+              <img class="critical" data-idx="2" data-role="side-thumb" alt="key thumb" width="480" height="480" decoding="async" fetchpriority="high">
+            </div>
+            <div>
+              <h4>关键图块</h4>
+              <p>首屏只保留一张辅助关键图片，其余图片全部下放为非关键内容。</p>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="hint-box">
+            本页面的 below-the-fold 内容已改为 uncritical：用户不滚动时，这些模块不会真实加载。
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <div class="card-title">
+            <h3>首屏优化说明</h3>
+            <span class="tiny">First-screen Only</span>
+          </div>
+          <div class="list-block">
+            <div class="list-item">
+              仅 2 张关键图片参与门控
+              <div class="muted">critical images only</div>
+            </div>
+            <div class="list-item">
+              仅 2 个关键模块参与门控
+              <div class="muted">critical modules only</div>
+            </div>
+            <div class="list-item">
+              下方内容改为滚动触发
+              <div class="muted">scroll-triggered lazy section loading</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="first-screen-grid">
+      <section class="card card-pad module loading" id="module-nav">
+        <div class="card-title">
+          <h3>关键导航</h3>
+          <span class="tiny">Critical Module A</span>
+        </div>
+        <div class="module-body">正在加载关键导航...</div>
+      </section>
+
+      <section class="card card-pad module loading" id="module-news">
+        <div class="card-title">
+          <h3>关键推荐</h3>
+          <span class="tiny">Critical Module B</span>
+        </div>
+        <div class="module-body">正在加载关键推荐...</div>
+      </section>
+    </section>
+
+    <div class="statusbar">
+      <div class="status-left">
+        <div class="status-line" id="status-line">正在等待首屏关键资源与模块加载完成……</div>
+        <div class="progress">
+          <div id="progress-bar"></div>
+        </div>
+        <div class="status-line">
+          本版本将非首屏内容视为 uncritical，不纳入首屏开始条件。
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn-like" id="restart-page">重新开始（第 1 关）</button>
+        <button class="btn-like primary" id="force-start" disabled>强制开始（调试用）</button>
+      </div>
+    </div>
+
+    <section class="below-fold">
+      <section class="card lazy-section" id="lazy-quick" data-lazy-kind="quick">
+        <div class="placeholder-shell">
+          <div class="placeholder-title"></div>
+          <div class="skeleton-list">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card lazy-section" id="lazy-gallery" data-lazy-kind="gallery">
+        <div class="placeholder-shell">
+          <div class="placeholder-title"></div>
+          <div class="skeleton-grid">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card lazy-section" id="lazy-docs" data-lazy-kind="docs">
+        <div class="placeholder-shell">
+          <div class="placeholder-title"></div>
+          <div class="skeleton-list">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card lazy-section" id="lazy-sidefeed" data-lazy-kind="sidefeed">
+        <div class="placeholder-shell">
+          <div class="placeholder-title"></div>
+          <div class="skeleton-list">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <div class="footer-area">
+      本版本为“首屏优化 + 非首屏滚动触发加载”模型。首屏仅保留用户开始任务所需的关键内容，其余区域变为 uncritical，并在用户滚动时延迟加载。
+    </div>
+  </main>
+
+  <div class="game-overlay" id="game-overlay">
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="h" id="panel-title">等待加载完成…</div></div>
+        <div class="mini" id="panel-mini">-</div>
+      </div>
+
+      <div class="panel-body">
+        <div class="block">
+          <div class="block-title">数字展示（Number Display）</div>
+          <div class="number" id="game-number">---</div>
+
+          <div class="input-row" id="input-row" style="display:none;">
+            <input id="guess-input" placeholder="请输入刚才看到的 3 位数字" />
+            <button class="primary" id="submit-btn">提交</button>
+            <button id="close-btn" style="display:none;">关闭</button>
+            <button id="restart-btn" style="display:none;">重来（第 1 关）</button>
+            <button id="next-btn" style="display:none;">下一关</button>
+          </div>
+
+          <div class="status-line" id="game-status" style="margin-top:10px;color:var(--muted);white-space:pre-line;"></div>
+        </div>
+
+        <div class="block">
+          <div class="block-title">全量反馈（Full Feedback）</div>
+          <div class="feedback" id="feedback">（游戏结束后会在这里输出完整信息）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   1) Parameters
+========================= */
+var level = getIntParam("level", 1);
+if (level < 1) level = 1;
+var run = getStrParam("run", String(Date.now()));
+
+function expBudget(level, startMs, ratio, minMs){
+  var raw = startMs * Math.pow(ratio, level - 1);
+  return Math.max(minMs, Math.round(raw));
+}
+
+var levelTimeLimit = expBudget(level, 7000, 0.8, 500);
+var idealDisplayTime = expBudget(level, 1000, 0.90, 150);
+
+var navEntry = performance.getEntriesByType("navigation")[0];
+var navStartTime = navEntry ? navEntry.startTime : 0;
+
+/* =========================
+   2) Badges
+========================= */
+var badgeLevel = document.getElementById("badge-level");
+var badgeBudget = document.getElementById("badge-budget");
+var badgeRemaining = document.getElementById("badge-remaining");
+var badgeState = document.getElementById("badge-state");
+
+badgeLevel.textContent = "Level: " + level;
+badgeBudget.textContent = "Budget: " + levelTimeLimit + "ms";
+badgeRemaining.textContent = "Remaining: ...";
+badgeState.textContent = "State: loading";
+
+/* =========================
+   3) Stats
+========================= */
+var STATS_KEY = "slow_site_game_stats_fs_scrolllazy_no_preload_v1";
+
+function loadStats(){
+  try{
+    var raw = localStorage.getItem(STATS_KEY);
+    if(!raw) return { totalDisplayMs: 0, displayCount: 0, maxLevelReached: 0 };
+    var s = JSON.parse(raw);
+    return {
+      totalDisplayMs: Number(s.totalDisplayMs) || 0,
+      displayCount: Number(s.displayCount) || 0,
+      maxLevelReached: Number(s.maxLevelReached) || 0
+    };
+  }catch(e){
+    return { totalDisplayMs: 0, displayCount: 0, maxLevelReached: 0 };
+  }
+}
+function saveStats(s){
+  try{ localStorage.setItem(STATS_KEY, JSON.stringify(s)); }catch(e){}
+}
+function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull){
+  var s = loadStats();
+  s.maxLevelReached = Math.max(s.maxLevelReached, currentLevel);
+  if (typeof actualDisplayTimeOrNull === "number" && isFinite(actualDisplayTimeOrNull) && actualDisplayTimeOrNull > 0){
+    s.totalDisplayMs += actualDisplayTimeOrNull;
+    s.displayCount += 1;
+  }
+  saveStats(s);
+  return s;
+}
+
+/* =========================
+   4) Device / Network
+========================= */
+var deviceInfo = {
+  hardwareConcurrency: navigator.hardwareConcurrency || "N/A",
+  deviceMemory: navigator.deviceMemory || "N/A",
+  userAgent: navigator.userAgent
+};
+var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || null;
+var networkRTT = conn && typeof conn.rtt === "number" ? conn.rtt : "N/A";
+var networkDownlink = conn && typeof conn.downlink === "number" ? conn.downlink : "N/A";
+var effectiveType = conn && conn.effectiveType ? conn.effectiveType : "N/A";
+
+var throttleProfile = {
+  enabled: true,
+  profileName: "controlled-first-screen-scroll-lazy-no-preload",
+  simulatedRttMs: 300,
+  simulatedJitterMs: 50,
+  simulatedDownKbps: 1600
+};
+
+/* =========================
+   5) Gate resources
+========================= */
+var criticalNodes = document.querySelectorAll("img.critical");
+var criticalTarget = criticalNodes.length;
+var moduleTarget = 2;
+
+var statusLine = document.getElementById("status-line");
+var progressBar = document.getElementById("progress-bar");
+var topProgressBar = document.getElementById("top-progress-bar");
+var forceStartBtn = document.getElementById("force-start");
+
+var criticalLoadedCount = 0;
+var moduleLoadedCount = 0;
+var gateTriggered = false;
+var gameEnded = false;
+var deferredNoTimeShown = false;
+
+var imgMetrics = [];
+for (var i = 0; i < criticalNodes.length; i++){
+  imgMetrics.push({
+    idx: i + 1,
+    status: "pending",
+    endMs: null,
+    role: criticalNodes[i].getAttribute("data-role") || "critical"
+  });
+}
+
+var moduleMetrics = [];
+var lazySectionMetrics = [];
+
+function gateTotal(){
+  return criticalTarget + moduleTarget;
+}
+function currentGateScore(){
+  return criticalLoadedCount + moduleLoadedCount;
+}
+function updateProgress(){
+  var pct = Math.round((currentGateScore() / gateTotal()) * 100);
+  progressBar.style.width = pct + "%";
+  if (topProgressBar) topProgressBar.style.width = pct + "%";
+
+  statusLine.textContent =
+    "正在等待首屏关键资源与模块加载完成……\n" +
+    "关键图片: " + criticalLoadedCount + "/" + criticalTarget +
+    " | 关键模块: " + moduleLoadedCount + "/" + moduleTarget +
+    " | 总进度: " + pct + "%";
+}
+function markCriticalWrap(idx, ok){
+  var wrap = document.getElementById("critical-wrap-" + idx);
+  if (!wrap) return;
+  wrap.classList.add(ok ? "loaded" : "error");
+}
+function finalizeImage(idx, ok){
+  if (imgMetrics[idx - 1].status !== "pending") return;
+  imgMetrics[idx - 1].status = ok ? "load" : "error";
+  imgMetrics[idx - 1].endMs = performance.now() - navStartTime;
+  criticalLoadedCount++;
+  markCriticalWrap(idx, ok);
+  updateProgress();
+  tryTriggerGate();
+}
+
+/* =========================
+   6) Critical image loading
+   不使用 preload，正常设置 src
+========================= */
+function loadCriticalImage(img, idx){
+  var url = idx === 1 ? makeImageUrl(301, 1280, 720) : makeImageUrl(302, 480, 480);
+  var artificialDelay = idx === 1 ? 50 : 110;
+
+  img.addEventListener("load", function(){ finalizeImage(idx, true); }, { once:true });
+  img.addEventListener("error", function(){ finalizeImage(idx, false); }, { once:true });
+
+  setTimeout(function(){
+    img.src = url;
+  }, artificialDelay);
+}
+
+for (var j = 0; j < criticalNodes.length; j++){
+  loadCriticalImage(criticalNodes[j], j + 1);
+}
+
+updateProgress();
+
+/* =========================
+   7) Critical modules only
+========================= */
+function recordModuleLoaded(id){
+  moduleLoadedCount++;
+  moduleMetrics.push({
+    id: id,
+    loadedAt: Math.round(performance.now() - navStartTime)
+  });
+  updateProgress();
+  tryTriggerGate();
+}
+
+function fakeModuleLoad(id, delay, html){
+  setTimeout(function(){
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove("loading");
+    var body = el.querySelector(".module-body");
+    if (body) body.innerHTML = html;
+    recordModuleLoaded(id);
+  }, delay);
+}
+
+var baseModuleDelay = 340 + (level - 1) * 70;
+
+fakeModuleLoad(
+  "module-nav",
+  baseModuleDelay,
+  '<div class="list-block">' +
+    '<div class="list-item">首页<div class="muted">优先展示的关键导航</div></div>' +
+    '<div class="list-item">推荐<div class="muted">首屏必要入口</div></div>' +
+    '<div class="list-item">分类<div class="muted">快速开始区域</div></div>' +
+  '</div>'
+);
+
+fakeModuleLoad(
+  "module-news",
+  baseModuleDelay + 180,
+  '<div class="list-block">' +
+    '<div class="list-item"><strong>推荐内容 A</strong><div class="muted">首屏关键内容已提前展示</div></div>' +
+    '<div class="list-item"><strong>推荐内容 B</strong><div class="muted">非首屏内容不再抢占首屏资源</div></div>' +
+    '<div class="list-item"><strong>推荐内容 C</strong><div class="muted">仅保留可开始任务所需信息</div></div>' +
+  '</div>'
+);
+
+/* =========================
+   8) Countdown
+========================= */
+var countdownTimer = null;
+var timeUp = false;
+var timeUpAt = null;
+var loadCountdownFrozen = false;
+var frozenRemainingMs = null;
+
+function getLoadRemainingMs(){
+  if (loadCountdownFrozen) return frozenRemainingMs;
+  var elapsed = performance.now() - navStartTime;
+  return Math.max(0, Math.round(levelTimeLimit - elapsed));
+}
+function freezeLoadCountdown(){
+  if (loadCountdownFrozen) return;
+  loadCountdownFrozen = true;
+  frozenRemainingMs = getLoadRemainingMs();
+  if (countdownTimer){
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+  badgeRemaining.textContent = "Remaining(load): " + frozenRemainingMs + "ms";
+}
+function startLoadCountdown(){
+  if (countdownTimer) return;
+  countdownTimer = setInterval(function(){
+    var remaining = getLoadRemainingMs();
+    badgeRemaining.textContent = "Remaining(load): " + remaining + "ms";
+    if (remaining <= 0 && !timeUp && !gameEnded){
+      timeUp = true;
+      timeUpAt = performance.now() - navStartTime;
+      badgeState.textContent = "State: load_time_up_deferred";
+    }
+  }, 50);
+}
+startLoadCountdown();
+
+function tryTriggerGate(){
+  if (gateTriggered || gameEnded) return;
+  if (criticalLoadedCount >= criticalTarget && moduleLoadedCount >= moduleTarget){
+    gateTriggered = true;
+    forceStartBtn.disabled = false;
+    freezeLoadCountdown();
+    badgeState.textContent = "State: ready";
+    onGateReady();
+  }
+}
+
+var metrics = {
+  level: level,
+  run: run,
+  levelTimeLimit: levelTimeLimit,
+  idealDisplayTime: idealDisplayTime,
+  navStartTime: navStartTime,
+  gateReadyAt: null,
+  loadDurationAtGate: null,
+  actualDisplayTime: null,
+  numberShownAt: null,
+  numberHiddenAt: null,
+  userSubmitAt: null,
+  userGuess: null,
+  result: null,
+  criticalLoadedCount: 0,
+  moduleLoadedCount: 0,
+  imgMetrics: imgMetrics,
+  moduleMetrics: moduleMetrics,
+  lazySectionMetrics: lazySectionMetrics
+};
+
+/* =========================
+   9) Game logic
+========================= */
+var gameOverlay = document.getElementById("game-overlay");
+var panelTitle = document.getElementById("panel-title");
+var panelMini = document.getElementById("panel-mini");
+var gameNumber = document.getElementById("game-number");
+var gameStatus = document.getElementById("game-status");
+var inputRow = document.getElementById("input-row");
+var guessInput = document.getElementById("guess-input");
+var submitBtn = document.getElementById("submit-btn");
+var closeBtn = document.getElementById("close-btn");
+var restartBtn = document.getElementById("restart-btn");
+var nextBtn = document.getElementById("next-btn");
+var feedbackEl = document.getElementById("feedback");
+
+var currentCode = "";
+
+function generateCode(){
+  currentCode = Math.floor(100 + Math.random() * 900).toString();
+}
+function showOverlayBase(){
+  gameOverlay.style.display = "flex";
+  inputRow.style.display = "flex";
+  closeBtn.style.display = "inline-block";
+}
+function onGateReady(){
+  if (gameEnded) return;
+
+  metrics.gateReadyAt = performance.now() - navStartTime;
+  metrics.loadDurationAtGate = metrics.gateReadyAt;
+  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.moduleLoadedCount = moduleLoadedCount;
+
+  if (metrics.loadDurationAtGate > levelTimeLimit){
+    metrics.result = "no_time_load";
+    badgeState.textContent = "State: load_time_up_after_gate";
+    showDeferredLoadNoTimeAfterGate();
+    return;
+  }
+
+  badgeState.textContent = "State: ready_to_play";
+  startGame();
+}
+function startGame(){
+  if (gameEnded || timeUp) return;
+
+  showOverlayBase();
+  submitBtn.style.display = "inline-block";
+  guessInput.style.display = "inline-block";
+  restartBtn.style.display = "none";
+  nextBtn.style.display = "none";
+
+  var now = performance.now();
+  var used = now - navStartTime;
+  var leftover = levelTimeLimit - used;
+
+  panelTitle.textContent = "第 " + level + " 关：首屏关键路径已完成";
+  panelMini.textContent =
+    "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
+    "Used until gate: " + Math.round(used) + "ms\n" +
+    "Critical: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
+    "Critical Modules: " + moduleLoadedCount + "/" + moduleTarget;
+
+  if (leftover <= 0){
+    endByNoTime();
+    return;
+  }
+
+  var actualDisplay = Math.min(idealDisplayTime, leftover);
+  metrics.actualDisplayTime = actualDisplay;
+
+  generateCode();
+  gameNumber.style.display = "block";
+  gameNumber.textContent = currentCode;
+  metrics.numberShownAt = performance.now() - navStartTime;
+
+  gameStatus.textContent =
+    "数字即将隐藏。请记住 3 位数。\n" +
+    "本版本仅优化首屏，非首屏内容只有在滚动后才会加载。";
+
+  setTimeout(function(){
+    if (gameEnded) return;
+    gameNumber.style.display = "none";
+    guessInput.value = "";
+    guessInput.focus();
+    metrics.numberHiddenAt = performance.now() - navStartTime;
+    gameStatus.textContent = "请输入刚才看到的 3 位数字：";
+  }, actualDisplay);
+}
+
+function formatReport(){
+  var loadTime = metrics.loadDurationAtGate != null ? Math.round(metrics.loadDurationAtGate) : "N/A";
+  var avgStats = updateStatsAfterRound(level, metrics.actualDisplayTime);
+  var avgDisplay = avgStats.displayCount > 0
+    ? Math.round(avgStats.totalDisplayMs / avgStats.displayCount)
+    : "N/A";
+
+  var lines = [];
+  lines.push("===== Experiment Metrics =====");
+  lines.push("");
+  lines.push("Version: first_screen_scroll_lazy_no_preload");
+  lines.push("LevelReached: " + level);
+  lines.push("Result: " + (metrics.result || "N/A"));
+  lines.push("LoadTime(ms): " + loadTime);
+  lines.push("ActualDisplayTime(ms): " + (metrics.actualDisplayTime != null ? Math.round(metrics.actualDisplayTime) : "N/A"));
+  lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
+  lines.push("CriticalLoadedAtGate: " + metrics.criticalLoadedCount + "/" + criticalTarget);
+  lines.push("CriticalModulesAtGate: " + metrics.moduleLoadedCount + "/" + moduleTarget);
+  lines.push("");
+  lines.push("----- Experiment Profile -----");
+  lines.push("ThrottleEnabled: " + throttleProfile.enabled);
+  lines.push("ThrottleProfileName: " + throttleProfile.profileName);
+  lines.push("SimulatedRTT(ms): " + throttleProfile.simulatedRttMs);
+  lines.push("SimulatedJitter(ms): " + throttleProfile.simulatedJitterMs);
+  lines.push("SimulatedDownlink(Kbps): " + throttleProfile.simulatedDownKbps);
+  lines.push("");
+  lines.push("----- Device Performance -----");
+  lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);
+  lines.push("DeviceMemory(GB): " + deviceInfo.deviceMemory);
+  lines.push("Browser: " + deviceInfo.userAgent);
+  lines.push("");
+  lines.push("----- Network API -----");
+  lines.push("RTT(ms): " + networkRTT);
+  lines.push("Downlink(Mb/s): " + networkDownlink);
+  lines.push("EffectiveType: " + effectiveType);
+  lines.push("");
+  lines.push("----- Critical Image Metrics -----");
+  for (var i = 0; i < metrics.imgMetrics.length; i++){
+    var m = metrics.imgMetrics[i];
+    lines.push("IMG" + m.idx + ": " + m.status + " @ " + (m.endMs != null ? Math.round(m.endMs) + "ms" : "N/A"));
+  }
+  lines.push("");
+  lines.push("----- Critical Module Metrics -----");
+  for (var j = 0; j < moduleMetrics.length; j++){
+    lines.push(moduleMetrics[j].id + ": " + moduleMetrics[j].loadedAt + "ms");
+  }
+  lines.push("");
+  lines.push("----- Lazy Below-the-fold Metrics -----");
+  if (lazySectionMetrics.length === 0){
+    lines.push("No lazy sections triggered before end of round.");
+  } else {
+    for (var k = 0; k < lazySectionMetrics.length; k++){
+      lines.push(
+        lazySectionMetrics[k].id +
+        ": observed@" + lazySectionMetrics[k].observedAt + "ms" +
+        ", loaded@" + lazySectionMetrics[k].loadedAt + "ms"
+      );
+    }
+  }
+  return lines.join("\n");
+}
+
+function finishRound(result){
+  if (gameEnded) return;
+  gameEnded = true;
+  metrics.result = result;
+
+  submitBtn.style.display = "none";
+  guessInput.style.display = "none";
+  closeBtn.style.display = "inline-block";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "inline-block";
+
+  if (result === "correct"){
+    nextBtn.style.display = "inline-block";
+    restartBtn.style.display = "none";
+  }
+
+  badgeState.textContent = "State: finished(" + result + ")";
+
+  try{
+    feedbackEl.textContent = formatReport();
+  }catch(e){
+    feedbackEl.textContent = "ReportError: " + (e && e.message ? e.message : String(e));
+  }
+}
+
+function showDeferredLoadNoTimeAfterGate(){
+  if (deferredNoTimeShown || gameEnded) return;
+  deferredNoTimeShown = true;
+
+  showOverlayBase();
+  panelTitle.textContent = "结束：加载阶段超时（load timeout）";
+  panelMini.textContent =
+    "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
+    "Gate finished at: " + Math.round(metrics.gateReadyAt) + "ms\n" +
+    "Time up first observed at: " + (timeUpAt != null ? Math.round(timeUpAt) + "ms" : "N/A");
+
+  gameNumber.textContent = "— — —";
+  gameNumber.style.display = "block";
+
+  gameStatus.textContent =
+    "在首屏关键门控达成时，加载时间已超过预算，因此判定为加载阶段超时。";
+
+  submitBtn.style.display = "none";
+  guessInput.style.display = "none";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "inline-block";
+
+  metrics.actualDisplayTime = null;
+  finishRound("no_time_load");
+}
+
+function endByNoTime(){
+  showOverlayBase();
+  panelTitle.textContent = "结束：时间不足";
+  panelMini.textContent = "Budget(Time Budget): " + levelTimeLimit + "ms";
+  gameNumber.textContent = "— — —";
+  gameNumber.style.display = "block";
+  gameStatus.textContent = "本关剩余时间不足，无法展示数字。";
+  submitBtn.style.display = "none";
+  guessInput.style.display = "none";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "inline-block";
+  metrics.actualDisplayTime = null;
+  finishRound("no_time");
+}
+
+submitBtn.addEventListener("click", function(){
+  if (gameEnded) return;
+  var guess = guessInput.value.trim();
+  if (!guess) return;
+
+  metrics.userGuess = guess;
+  metrics.userSubmitAt = performance.now() - navStartTime;
+
+  if (guess === currentCode){
+    panelTitle.textContent = "通过：回答正确";
+    gameStatus.textContent = "你答对了。可进入下一关。";
+    finishRound("correct");
+  } else {
+    panelTitle.textContent = "结束：回答错误";
+    gameStatus.textContent = "你答错了。本次实验结束。";
+    finishRound("wrong");
+  }
+});
+
+guessInput.addEventListener("keydown", function(e){
+  if (e.key === "Enter") submitBtn.click();
+});
+
+closeBtn.addEventListener("click", function(){
+  gameOverlay.style.display = "none";
+});
+
+restartBtn.addEventListener("click", function(){
+  try{ localStorage.removeItem(STATS_KEY); }catch(e){}
+  var url = new URL(window.location.href);
+  url.searchParams.set("level", 1);
+  url.searchParams.set("run", String(Date.now()));
+  window.location.href = url.toString();
+});
+
+nextBtn.addEventListener("click", function(){
+  var url = new URL(window.location.href);
+  url.searchParams.set("level", level + 1);
+  url.searchParams.set("run", String(Date.now()));
+  window.location.href = url.toString();
+});
+
+document.getElementById("restart-page").addEventListener("click", function(){
+  try{ localStorage.removeItem(STATS_KEY); }catch(e){}
+  var url = new URL(window.location.href);
+  url.searchParams.set("level", 1);
+  url.searchParams.set("run", String(Date.now()));
+  window.location.href = url.toString();
+});
+
+forceStartBtn.addEventListener("click", function(){
+  if (gameEnded || timeUp) return;
+
+  for (var i = 0; i < imgMetrics.length; i++){
+    if (imgMetrics[i].status === "pending"){
+      imgMetrics[i].status = "forced";
+      imgMetrics[i].endMs = performance.now() - navStartTime;
+      criticalLoadedCount++;
+      markCriticalWrap(i + 1, false);
+    }
+  }
+  while (moduleLoadedCount < moduleTarget){
+    moduleLoadedCount++;
+  }
+
+  updateProgress();
+  freezeLoadCountdown();
+  badgeState.textContent = "State: forced";
+  metrics.gateReadyAt = performance.now() - navStartTime;
+  metrics.loadDurationAtGate = metrics.gateReadyAt;
+  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.moduleLoadedCount = moduleLoadedCount;
+  startGame();
+});
+
+document.getElementById("fake-search-btn").addEventListener("click", function(){
+  var btn = this;
+  if (btn.disabled) return;
+  btn.disabled = true;
+  var old = btn.textContent;
+  btn.textContent = "搜索中...";
+  setTimeout(function(){
+    btn.disabled = false;
+    btn.textContent = old;
+    if (!gameEnded && !gateTriggered) badgeState.textContent = "State: loading";
+    else if (!gameEnded && gateTriggered) badgeState.textContent = "State: ready_to_play";
+    alert("搜索结果已更新（首屏优化 / 滚动延迟加载版）");
+  }, 850 + (level - 1) * 80);
+});
+
+/* =========================
+   10) Below-the-fold lazy load
+========================= */
+function makeFeedCard(seed, title, desc){
+  var src = makeImageUrl(seed, 720, 420);
+  return '' +
+    '<article class="feed-card">' +
+      '<div class="thumb"><img src="' + src + '" alt="' + title + '" loading="lazy" decoding="async" width="720" height="420"></div>' +
+      '<div class="body">' +
+        '<h4>' + title + '</h4>' +
+        '<p>' + desc + '</p>' +
+      '</div>' +
+    '</article>';
+}
+
+function renderLazySection(section, kind){
+  if (!section || section.dataset.loaded === "1") return;
+
+  section.dataset.loaded = "1";
+  var observedAt = Math.round(performance.now() - navStartTime);
+
+  var delayMap = {
+    quick: 500,
+    gallery: 900,
+    docs: 650,
+    sidefeed: 780
+  };
+  var delay = (delayMap[kind] || 700) + (level - 1) * 60;
+
+  setTimeout(function(){
+    var html = "";
+
+    if (kind === "quick"){
+      html =
+        '<div class="card-pad">' +
+          '<div class="card-title"><h3>快捷入口</h3><span class="tiny">Uncritical</span></div>' +
+          '<div class="list-block">' +
+            '<div class="list-item">快捷入口 A<div class="muted">滚动后才开始加载</div></div>' +
+            '<div class="list-item">快捷入口 B<div class="muted">不参与首屏门控</div></div>' +
+            '<div class="list-item">快捷入口 C<div class="muted">below-the-fold 内容</div></div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    if (kind === "gallery"){
+      html =
+        '<div class="card-pad">' +
+          '<div class="card-title"><h3>图文卡片</h3><span class="tiny">Scroll-triggered</span></div>' +
+          '<div class="feed-grid">' +
+            makeFeedCard(311, "图文卡片 A", "用户滚动到该区域后才加载") +
+            makeFeedCard(312, "图文卡片 B", "已从 critical path 中移除") +
+            makeFeedCard(313, "图文卡片 C", "首屏不再被此区域拖慢") +
+            makeFeedCard(314, "图文卡片 D", "uncritical content") +
+            makeFeedCard(315, "图文卡片 E", "lazy loaded below the fold") +
+            makeFeedCard(316, "图文卡片 F", "仅在进入视口后触发") +
+          '</div>' +
+        '</div>';
+    }
+
+    if (kind === "docs"){
+      html =
+        '<div class="card-pad">' +
+          '<div class="card-title"><h3>下载与附件</h3><span class="tiny">Deferred</span></div>' +
+          '<div class="list-block">' +
+            '<div class="list-item"><strong>附件说明.pdf</strong><div class="muted">下滑后才开始请求</div></div>' +
+            '<div class="list-item"><strong>资源列表.xlsx</strong><div class="muted">与首屏解耦</div></div>' +
+            '<div class="list-item"><strong>历史归档.zip</strong><div class="muted">不参与首屏门控</div></div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    if (kind === "sidefeed"){
+      html =
+        '<div class="card-pad">' +
+          '<div class="card-title"><h3>热点与推荐</h3><span class="tiny">Deferred</span></div>' +
+          '<div class="list-block">' +
+            '<div class="list-item">热点推荐 1<div class="muted">scroll lazy loaded</div></div>' +
+            '<div class="list-item">热点推荐 2<div class="muted">非首屏关键内容</div></div>' +
+            '<div class="list-item">热点推荐 3<div class="muted">实验中作为 uncritical 区域</div></div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    section.innerHTML = html;
+
+    lazySectionMetrics.push({
+      id: section.id,
+      observedAt: observedAt,
+      loadedAt: Math.round(performance.now() - navStartTime)
+    });
+  }, delay);
+}
+
+var lazySections = document.querySelectorAll(".lazy-section");
+
+if ("IntersectionObserver" in window){
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting){
+        var el = entry.target;
+        renderLazySection(el, el.dataset.lazyKind);
+        io.unobserve(el);
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: "150px 0px",
+    threshold: 0.05
+  });
+
+  lazySections.forEach(function(el){
+    io.observe(el);
+  });
+} else {
+  lazySections.forEach(function(el){
+    renderLazySection(el, el.dataset.lazyKind);
+  });
+}
+</script>
+</body>
+</html>
