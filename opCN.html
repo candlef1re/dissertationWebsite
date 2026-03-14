@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>毕设实验网站 - 首屏优化版（无 Preload）</title>
 
-  <!-- 仅保留连接优化，不使用 preload -->
-  <link rel="preconnect" href="https://picsum.photos" crossorigin>
-  <link rel="dns-prefetch" href="//picsum.photos">
-
   <script>
     function getIntParam(name, fallback){
       var params = new URLSearchParams(window.location.search);
@@ -28,6 +24,15 @@
     function makeImageUrl(seed, w, h){
       return "https://picsum.photos/" + w + "/" + h + "?random=" + seed + "&lv=" + encodeURIComponent(__level_pre) + "&run=" + encodeURIComponent(__run_pre);
     }
+    function generateCompletionCode(){
+
+    var version = "OPCN";
+    var lvl = String(level).padStart(3,"0");
+
+    var random = Math.floor(1000 + Math.random()*9000);
+
+    return "EXP-" + version + "-" + lvl + "-" + random;
+  }
   </script>
 
   <style>
@@ -650,7 +655,7 @@
       <div class="card critical-wrap" id="critical-wrap-1">
         <span class="spinner"></span>
         <div class="hero-media">
-          <img class="critical" data-idx="1" data-role="hero" alt="hero banner" width="1280" height="720" decoding="async" fetchpriority="high">
+          <img class="critical" data-idx="1" data-role="hero" alt="hero banner" width="1280" height="720" fetchpriority="high">
           <div class="hero-overlay">
             <h2>首页图片</h2>
             <p>这个版本只保留首屏必要内容，非首屏内容会在用户滚动后才开始加载。</p>
@@ -668,7 +673,7 @@
           <div class="mini-stat">
             <div class="thumb critical-wrap" id="critical-wrap-2">
               <span class="spinner"></span>
-              <img class="critical" data-idx="2" data-role="side-thumb" alt="key thumb" width="480" height="480" decoding="async" fetchpriority="high">
+              <img class="critical" data-idx="2" data-role="side-thumb" alt="key thumb" width="480" height="480" fetchpriority="high">
             </div>
             <div>
               <h4>关键图块</h4>
@@ -824,9 +829,6 @@
   </div>
 
 <script>
-/* =========================
-   1) Parameters
-========================= */
 var level = getIntParam("level", 1);
 if (level < 1) level = 1;
 var run = getStrParam("run", String(Date.now()));
@@ -836,15 +838,12 @@ function expBudget(level, startMs, ratio, minMs){
   return Math.max(minMs, Math.round(raw));
 }
 
-var levelTimeLimit = expBudget(level, 7000, 0.8, 500);
+var levelTimeLimit = expBudget(level, 8000, 0.75, 500);
 var idealDisplayTime = expBudget(level, 1000, 0.90, 150);
 
 var navEntry = performance.getEntriesByType("navigation")[0];
 var navStartTime = navEntry ? navEntry.startTime : 0;
 
-/* =========================
-   2) Badges
-========================= */
 var badgeLevel = document.getElementById("badge-level");
 var badgeBudget = document.getElementById("badge-budget");
 var badgeRemaining = document.getElementById("badge-remaining");
@@ -855,9 +854,7 @@ badgeBudget.textContent = "Budget: " + levelTimeLimit + "ms";
 badgeRemaining.textContent = "Remaining: ...";
 badgeState.textContent = "State: loading";
 
-/* =========================
-   3) Stats
-========================= */
+
 var STATS_KEY = "slow_site_game_stats_fs_scrolllazy_no_preload_v1";
 
 function loadStats(){
@@ -888,9 +885,7 @@ function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull){
   return s;
 }
 
-/* =========================
-   4) Device / Network
-========================= */
+
 var deviceInfo = {
   hardwareConcurrency: navigator.hardwareConcurrency || "N/A",
   deviceMemory: navigator.deviceMemory || "N/A",
@@ -909,9 +904,7 @@ var throttleProfile = {
   simulatedDownKbps: 1600
 };
 
-/* =========================
-   5) Gate resources
-========================= */
+
 var criticalNodes = document.querySelectorAll("img.critical");
 var criticalTarget = criticalNodes.length;
 var moduleTarget = 2;
@@ -972,10 +965,7 @@ function finalizeImage(idx, ok){
   tryTriggerGate();
 }
 
-/* =========================
-   6) Critical image loading
-   不使用 preload，正常设置 src
-========================= */
+
 function loadCriticalImage(img, idx){
   var url = idx === 1 ? makeImageUrl(301, 1280, 720) : makeImageUrl(302, 480, 480);
   var artificialDelay = idx === 1 ? 50 : 110;
@@ -1201,6 +1191,7 @@ function startGame(){
   }, actualDisplay);
 }
 
+
 function formatReport(){
   var loadTime = metrics.loadDurationAtGate != null ? Math.round(metrics.loadDurationAtGate) : "N/A";
   var avgStats = updateStatsAfterRound(level, metrics.actualDisplayTime);
@@ -1209,6 +1200,9 @@ function formatReport(){
     : "N/A";
 
   var lines = [];
+  var completionCode = generateCompletionCode();
+  
+  lines.push("optimized version")
   lines.push("===== Experiment Metrics =====");
   lines.push("");
   lines.push("Version: first_screen_scroll_lazy_no_preload");
@@ -1237,29 +1231,7 @@ function formatReport(){
   lines.push("Downlink(Mb/s): " + networkDownlink);
   lines.push("EffectiveType: " + effectiveType);
   lines.push("");
-  lines.push("----- Critical Image Metrics -----");
-  for (var i = 0; i < metrics.imgMetrics.length; i++){
-    var m = metrics.imgMetrics[i];
-    lines.push("IMG" + m.idx + ": " + m.status + " @ " + (m.endMs != null ? Math.round(m.endMs) + "ms" : "N/A"));
-  }
-  lines.push("");
-  lines.push("----- Critical Module Metrics -----");
-  for (var j = 0; j < moduleMetrics.length; j++){
-    lines.push(moduleMetrics[j].id + ": " + moduleMetrics[j].loadedAt + "ms");
-  }
-  lines.push("");
-  lines.push("----- Lazy Below-the-fold Metrics -----");
-  if (lazySectionMetrics.length === 0){
-    lines.push("No lazy sections triggered before end of round.");
-  } else {
-    for (var k = 0; k < lazySectionMetrics.length; k++){
-      lines.push(
-        lazySectionMetrics[k].id +
-        ": observed@" + lazySectionMetrics[k].observedAt + "ms" +
-        ", loaded@" + lazySectionMetrics[k].loadedAt + "ms"
-      );
-    }
-  }
+  lines.push("CompletionCode: " + completionCode);
   return lines.join("\n");
 }
 
@@ -1426,7 +1398,7 @@ function makeFeedCard(seed, title, desc){
   var src = makeImageUrl(seed, 720, 420);
   return '' +
     '<article class="feed-card">' +
-      '<div class="thumb"><img src="' + src + '" alt="' + title + '" loading="lazy" decoding="async" width="720" height="420"></div>' +
+      '<div class="thumb"><img src="' + src + '" alt="' + title + '" loading="lazy" width="720" height="420"></div>' +
       '<div class="body">' +
         '<h4>' + title + '</h4>' +
         '<p>' + desc + '</p>' +

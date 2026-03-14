@@ -784,7 +784,7 @@ function expBudget(level, startMs, ratio, minMs){
   var raw = startMs * Math.pow(ratio, level - 1);
   return Math.max(minMs, Math.round(raw));
 }
-var levelTimeLimit = expBudget(level, 7000, 0.8, 500);
+var levelTimeLimit = expBudget(level, 13000, 0.8, 500);
 var idealDisplayTime = expBudget(level, 1000, 0.90, 150);
 
 var navEntry = performance.getEntriesByType("navigation")[0];
@@ -1186,6 +1186,7 @@ function formatReport(){
     : "N/A";
 
   var lines = [];
+  lines.push("unoptimized version")
   lines.push("===== Experiment Metrics =====");
   lines.push("");
   lines.push("LevelReached: " + level);
