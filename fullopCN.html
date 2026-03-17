@@ -951,15 +951,12 @@ function expBudget(level, startMs, ratio, minMs){
   return Math.max(minMs, Math.round(raw));
 }
 
-var levelTimeLimit = expBudget(level, 8000, 0.8, 500);
+var levelTimeLimit = expBudget(level, 11000, 0.8, 500);
 var idealDisplayTime = expBudget(level, 1000, 0.90, 150);
 
 var navEntry = performance.getEntriesByType("navigation")[0];
 var navStartTime = navEntry ? navEntry.startTime : 0;
 
-/* =========================
-   2) Badges
-========================= */
 var badgeLevel = document.getElementById("badge-level");
 var badgeBudget = document.getElementById("badge-budget");
 var badgeRemaining = document.getElementById("badge-remaining");
@@ -1354,13 +1351,6 @@ function formatReport(){
   lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
   lines.push("CriticalLoadedAtGate: " + metrics.criticalLoadedCount + "/" + criticalTarget);
   lines.push("CriticalModulesAtGate: " + metrics.moduleLoadedCount + "/" + moduleTarget);
-  lines.push("");
-  lines.push("----- Experiment Profile -----");
-  lines.push("ThrottleEnabled: " + throttleProfile.enabled);
-  lines.push("ThrottleProfileName: " + throttleProfile.profileName);
-  lines.push("SimulatedRTT(ms): " + throttleProfile.simulatedRttMs);
-  lines.push("SimulatedJitter(ms): " + throttleProfile.simulatedJitterMs);
-  lines.push("SimulatedDownlink(Kbps): " + throttleProfile.simulatedDownKbps);
   lines.push("");
   lines.push("----- Device Performance -----");
   lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);

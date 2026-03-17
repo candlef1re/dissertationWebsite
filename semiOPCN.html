@@ -846,7 +846,7 @@ var effectiveType = conn && conn.effectiveType ? conn.effectiveType : "N/A";
 //critical resources
 var criticalNodes = document.querySelectorAll("img.critical");
 var criticalTarget = criticalNodes.length; // 当前共 5 张关键图
-var moduleTarget = 4; // 6个模块里达到4个即可开始
+var moduleTarget = 0; // 模块不再作为开始条件
 var statusLine = document.getElementById("status-line");
 var progressBar = document.getElementById("progress-bar");
 var topProgressBar = document.getElementById("top-progress-bar");
@@ -869,10 +869,10 @@ for (var i = 0; i < criticalNodes.length; i++){
 }
 
 function currentGateScore(){
-  return criticalLoadedCount + moduleLoadedCount;
+  return criticalLoadedCount;
 }
 function gateTotal(){
-  return criticalTarget + moduleTarget;
+  return criticalTarget;
 }
 function updateProgress(){
   var pct = Math.round((currentGateScore() / gateTotal()) * 100);
@@ -880,10 +880,10 @@ function updateProgress(){
   if (topProgressBar) topProgressBar.style.width = pct + "%";
 
   statusLine.textContent =
-    "正在等待首屏关键资源与模块加载完成……\n" +
-    "关键图片: " + criticalLoadedCount + "/" + criticalTarget +
-    " | 模块: " + moduleLoadedCount + "/" + moduleTarget +
-    " | 总进度: " + pct + "%";
+    "正在等待首屏关键内容加载完成……\n" +
+    "首屏关键图片: " + criticalLoadedCount + "/" + criticalTarget +
+    " | 下方模块已加载: " + moduleLoadedCount + "（不影响开始）" +
+    " | 首屏进度: " + pct + "%";
 }
 function markCriticalWrap(idx, ok){
   var wrap = document.getElementById("critical-wrap-" + idx);
@@ -1052,7 +1052,7 @@ startLoadCountdown();
 function tryTriggerGate(){
   if (gateTriggered || gameEnded) return;
 
-  if (criticalLoadedCount >= criticalTarget && moduleLoadedCount >= moduleTarget){
+  if (criticalLoadedCount >= criticalTarget){
     gateTriggered = true;
     forceStartBtn.disabled = false;
     freezeLoadCountdown();
@@ -1149,7 +1149,7 @@ function startGame(){
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
     "Used until gate: " + Math.round(used) + "ms\n" +
     "Critical: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
-    "Modules: " + moduleLoadedCount + "/" + moduleTarget;
+    "Modules: " + moduleLoadedCount + "（not required）";
 
   if (leftover <= 0){
     endByNoTime();
@@ -1186,7 +1186,7 @@ function formatReport(){
     : "N/A";
 
   var lines = [];
-  lines.push("unoptimized version")
+  lines.push("semioptimized version");
   lines.push("===== Experiment Metrics =====");
   lines.push("");
   lines.push("LevelReached: " + level);
@@ -1195,7 +1195,7 @@ function formatReport(){
   lines.push("ActualDisplayTime(ms): " + (metrics.actualDisplayTime != null ? Math.round(metrics.actualDisplayTime) : "N/A"));
   lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
   lines.push("CriticalLoadedAtGate: " + metrics.criticalLoadedCount + "/" + criticalTarget);
-  lines.push("ModulesLoadedAtGate: " + metrics.moduleLoadedCount + "/" + moduleTarget);
+  lines.push("ModulesLoadedAtGate: " + metrics.moduleLoadedCount + "（not required）");
   lines.push("");
   lines.push("----- Device Performance -----");
   lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);
