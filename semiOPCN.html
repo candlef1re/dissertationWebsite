@@ -160,7 +160,6 @@
       justify-content:space-between;
       gap:10px;
       margin-bottom:10px;
-
     }
     .card-title h2,
     .card-title h3{
@@ -330,7 +329,7 @@
       gap:16px;
     }
     .content-feed h3{
-        color:#eef4ff
+      color:#eef4ff
     }
 
     .feed-grid{
@@ -701,7 +700,7 @@
 
     <div class="statusbar">
       <div class="status-left">
-        <div class="status-line" id="status-line">正在等待首屏关键资源与模块加载完成……</div>
+        <div class="status-line" id="status-line">正在等待首屏最小可用内容加载完成……</div>
         <div class="progress" aria-label="load progress">
           <div id="progress-bar"></div>
         </div>
@@ -768,7 +767,7 @@ var level = getIntParam("level", 1);
 if (level < 1) level = 1;
 var run = getStrParam("run", String(Date.now()));
 
-//故意做一点主线程阻塞
+// 故意做一点主线程阻塞
 (function heavySyncTask(){
   var temp = [];
   for (var round = 0; round < 18; round++){
@@ -790,7 +789,7 @@ var idealDisplayTime = expBudget(level, 1000, 0.90, 150);
 var navEntry = performance.getEntriesByType("navigation")[0];
 var navStartTime = navEntry ? navEntry.startTime : 0;
 
-//badges
+// badges
 var badgeLevel = document.getElementById("badge-level");
 var badgeBudget = document.getElementById("badge-budget");
 var badgeRemaining = document.getElementById("badge-remaining");
@@ -801,7 +800,7 @@ badgeBudget.textContent = "Budget: " + levelTimeLimit + "ms";
 badgeRemaining.textContent = "Remaining: ...";
 badgeState.textContent = "State: loading";
 
-//statistics
+// statistics
 var STATS_KEY = "slow_site_game_stats_v1";
 
 function loadStats(){
@@ -832,7 +831,7 @@ function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull){
   return s;
 }
 
-//network
+// network
 var deviceInfo = {
   hardwareConcurrency: navigator.hardwareConcurrency || "N/A",
   deviceMemory: navigator.deviceMemory || "N/A",
@@ -843,20 +842,33 @@ var networkRTT = conn && typeof conn.rtt === "number" ? conn.rtt : "N/A";
 var networkDownlink = conn && typeof conn.downlink === "number" ? conn.downlink : "N/A";
 var effectiveType = conn && conn.effectiveType ? conn.effectiveType : "N/A";
 
-//critical resources
+// 首屏图片
 var criticalNodes = document.querySelectorAll("img.critical");
-var criticalTarget = criticalNodes.length; // 当前共 5 张关键图
-var moduleTarget = 0; // 模块不再作为开始条件
+var gateNodes = document.querySelectorAll('img.critical[data-role="hero"]');
+
+// 最小可用首屏：只等 hero 主图
+var gateTarget = gateNodes.length > 0 ? gateNodes.length : 1;
+
+// 其余首屏图继续加载，但不阻塞数字开始
+var visualTarget = criticalNodes.length;
+var moduleTarget = 0;
+
 var statusLine = document.getElementById("status-line");
 var progressBar = document.getElementById("progress-bar");
 var topProgressBar = document.getElementById("top-progress-bar");
 var forceStartBtn = document.getElementById("force-start");
 
-var criticalLoadedCount = 0;
+var gateLoadedCount = 0;      // 门控完成度（最小可用首屏）
+var visualLoadedCount = 0;    // 所有首屏图片完成数
 var moduleLoadedCount = 0;
+
 var gameEnded = false;
 var gateTriggered = false;
 var deferredNoTimeShown = false;
+
+function isGateImageNode(node){
+  return node && node.getAttribute("data-role") === "hero";
+}
 
 var imgMetrics = [];
 for (var i = 0; i < criticalNodes.length; i++){
@@ -864,15 +876,16 @@ for (var i = 0; i < criticalNodes.length; i++){
     idx: i + 1,
     status: "pending",
     endMs: null,
-    role: criticalNodes[i].getAttribute("data-role") || "critical"
+    role: criticalNodes[i].getAttribute("data-role") || "critical",
+    isGate: isGateImageNode(criticalNodes[i])
   });
 }
 
 function currentGateScore(){
-  return criticalLoadedCount;
+  return gateLoadedCount;
 }
 function gateTotal(){
-  return criticalTarget;
+  return gateTarget;
 }
 function updateProgress(){
   var pct = Math.round((currentGateScore() / gateTotal()) * 100);
@@ -880,35 +893,54 @@ function updateProgress(){
   if (topProgressBar) topProgressBar.style.width = pct + "%";
 
   statusLine.textContent =
-    "正在等待首屏关键内容加载完成……\n" +
-    "首屏关键图片: " + criticalLoadedCount + "/" + criticalTarget +
+    "正在等待首屏最小可用内容加载完成……\n" +
+    "最小可用首屏(hero): " + gateLoadedCount + "/" + gateTarget +
+    " | 其余首屏图片: " + Math.max(0, visualLoadedCount - gateLoadedCount) + "/" + Math.max(0, visualTarget - gateTarget) +
     " | 下方模块已加载: " + moduleLoadedCount + "（不影响开始）" +
-    " | 首屏进度: " + pct + "%";
+    " | 开始门控进度: " + pct + "%";
 }
+
 function markCriticalWrap(idx, ok){
   var wrap = document.getElementById("critical-wrap-" + idx);
   if (!wrap) return;
   wrap.classList.add(ok ? "loaded" : "error");
 }
+
 function finalizeImage(idx, ok){
   if (imgMetrics[idx - 1].status !== "pending") return;
+
   imgMetrics[idx - 1].status = ok ? "load" : "error";
   imgMetrics[idx - 1].endMs = performance.now() - navStartTime;
-  criticalLoadedCount++;
+
+  visualLoadedCount++;
+  if (imgMetrics[idx - 1].isGate){
+    gateLoadedCount++;
+  }
+
   markCriticalWrap(idx, ok);
   updateProgress();
   tryTriggerGate();
 }
 
 /* =========================
-   7) 模拟慢图片加载
+   模拟慢图片加载
 ========================= */
 function makeImageUrl(seed, w, h){
   return "https://picsum.photos/" + w + "/" + h + "?random=" + seed + "&lv=" + encodeURIComponent(level) + "&run=" + encodeURIComponent(run);
 }
 
 function loadCriticalImage(img, idx){
-  var artificialDelay = 450 + idx * 180 + (level - 1) * 90;
+  var role = img.getAttribute("data-role") || "thumb";
+  var artificialDelay;
+
+  if (role === "hero"){
+    // hero 更早加载：首屏最小可用
+    artificialDelay = 120 + (level - 1) * 60;
+  } else {
+    // 其它图继续慢慢到达，但不阻塞开始
+    artificialDelay = 550 + idx * 220 + (level - 1) * 100;
+  }
+
   var url = (idx === 1)
     ? makeImageUrl(100 + idx, 1600, 900)
     : makeImageUrl(100 + idx, 800, 800);
@@ -1052,7 +1084,7 @@ startLoadCountdown();
 function tryTriggerGate(){
   if (gateTriggered || gameEnded) return;
 
-  if (criticalLoadedCount >= criticalTarget){
+  if (gateLoadedCount >= gateTarget){
     gateTriggered = true;
     forceStartBtn.disabled = false;
     freezeLoadCountdown();
@@ -1079,14 +1111,15 @@ var metrics = {
   userGuess: null,
   result: null,
 
-  criticalLoadedCount: 0,
+  gateLoadedCount: 0,
+  visualLoadedCount: 0,
   moduleLoadedCount: 0,
   imgMetrics: imgMetrics,
   moduleMetrics: moduleMetrics
 };
 
 /* =========================
-   11) 游戏逻辑
+   游戏逻辑
 ========================= */
 var gameOverlay = document.getElementById("game-overlay");
 var panelTitle = document.getElementById("panel-title");
@@ -1116,7 +1149,8 @@ function onGateReady(){
 
   metrics.gateReadyAt = performance.now() - navStartTime;
   metrics.loadDurationAtGate = metrics.gateReadyAt;
-  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.gateLoadedCount = gateLoadedCount;
+  metrics.visualLoadedCount = visualLoadedCount;
   metrics.moduleLoadedCount = moduleLoadedCount;
 
   var loadTooSlow = metrics.loadDurationAtGate > levelTimeLimit;
@@ -1144,11 +1178,12 @@ function startGame(){
   var used = now - navStartTime;
   var leftover = levelTimeLimit - used;
 
-  panelTitle.textContent = "第 " + level + " 关：关键首屏已完成";
+  panelTitle.textContent = "第 " + level + " 关：最小可用首屏已完成";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
     "Used until gate: " + Math.round(used) + "ms\n" +
-    "Critical: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
+    "Minimum usable hero: " + gateLoadedCount + "/" + gateTarget + "\n" +
+    "Other first-screen images loaded: " + Math.max(0, visualLoadedCount - gateLoadedCount) + "/" + Math.max(0, visualTarget - gateTarget) + "\n" +
     "Modules: " + moduleLoadedCount + "（not required）";
 
   if (leftover <= 0){
@@ -1166,7 +1201,7 @@ function startGame(){
 
   gameStatus.textContent =
     "数字即将隐藏。请记住 3 位数。\n" +
-    "本实验模拟的是通用慢网站，而不是仅仅图片加载慢。";
+    "本版本采用首屏最小可用门控：hero 主图完成后即开始。";
 
   setTimeout(function(){
     if (gameEnded) return;
@@ -1194,7 +1229,8 @@ function formatReport(){
   lines.push("LoadTime(ms): " + loadTime);
   lines.push("ActualDisplayTime(ms): " + (metrics.actualDisplayTime != null ? Math.round(metrics.actualDisplayTime) : "N/A"));
   lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
-  lines.push("CriticalLoadedAtGate: " + metrics.criticalLoadedCount + "/" + criticalTarget);
+  lines.push("GateLoadedAtStart(hero only): " + metrics.gateLoadedCount + "/" + gateTarget);
+  lines.push("AllFirstScreenImagesLoadedAtStart: " + metrics.visualLoadedCount + "/" + visualTarget);
   lines.push("ModulesLoadedAtGate: " + metrics.moduleLoadedCount + "（not required）");
   lines.push("");
   lines.push("----- Device Performance -----");
@@ -1253,8 +1289,8 @@ function showDeferredLoadNoTimeAfterGate(){
   gameNumber.style.display = "block";
 
   gameStatus.textContent =
-    "本实验只评估首屏关键加载完成前的等待体验。\n" +
-    "在门控达成时，加载耗时已超过预算，因此判定为加载阶段超时。";
+    "本实验只评估首屏最小可用内容出现前的等待体验。\n" +
+    "在 hero 主图可用时，加载耗时已超过预算，因此判定为加载阶段超时。";
 
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
@@ -1337,7 +1373,10 @@ forceStartBtn.addEventListener("click", function(){
     if (imgMetrics[i].status === "pending"){
       imgMetrics[i].status = "forced";
       imgMetrics[i].endMs = performance.now() - navStartTime;
-      criticalLoadedCount++;
+      visualLoadedCount++;
+      if (imgMetrics[i].isGate){
+        gateLoadedCount++;
+      }
       markCriticalWrap(i + 1, false);
     }
   }
@@ -1351,7 +1390,8 @@ forceStartBtn.addEventListener("click", function(){
   badgeState.textContent = "State: forced";
   metrics.gateReadyAt = performance.now() - navStartTime;
   metrics.loadDurationAtGate = metrics.gateReadyAt;
-  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.gateLoadedCount = gateLoadedCount;
+  metrics.visualLoadedCount = visualLoadedCount;
   metrics.moduleLoadedCount = moduleLoadedCount;
   startGame();
 });
