@@ -700,7 +700,7 @@
 
     <div class="statusbar">
       <div class="status-left">
-        <div class="status-line" id="status-line">正在等待首屏最小可用内容加载完成……</div>
+        <div class="status-line" id="status-line">正在等待首屏所有关键图片真正加载完成……</div>
         <div class="progress" aria-label="load progress">
           <div id="progress-bar"></div>
         </div>
@@ -716,7 +716,7 @@
     </div>
 
     <div class="footer-area">
-      本页面为实验用半优化网站模型（采用 unop 布局样式）。
+      本页面为实验用半优化网站模型（采用 unop 布局样式）。当前版本已改为：必须等首屏所有关键图片真正加载完成后才显示数字。
     </div>
   </main>
 
@@ -844,12 +844,11 @@ var effectiveType = conn && conn.effectiveType ? conn.effectiveType : "N/A";
 
 // 首屏图片
 var criticalNodes = document.querySelectorAll("img.critical");
-var gateNodes = document.querySelectorAll('img.critical[data-role="hero"]');
+var gateNodes = criticalNodes;
 
-// 最小可用首屏：只等 hero 主图
+// 严格首屏门控：必须等首屏所有关键图都真正加载成功后才开始
 var gateTarget = gateNodes.length > 0 ? gateNodes.length : 1;
 
-// 其余首屏图继续加载，但不阻塞数字开始
 var visualTarget = criticalNodes.length;
 var moduleTarget = 0;
 
@@ -858,8 +857,10 @@ var progressBar = document.getElementById("progress-bar");
 var topProgressBar = document.getElementById("top-progress-bar");
 var forceStartBtn = document.getElementById("force-start");
 
-var gateLoadedCount = 0;      // 门控完成度（最小可用首屏）
-var visualLoadedCount = 0;    // 所有首屏图片完成数
+var gateLoadedCount = 0;      // 门控完成度（首屏所有关键图成功加载）
+var visualLoadedCount = 0;    // 所有首屏图片成功加载数
+var visualFinishedCount = 0;  // 所有首屏图片已完成（load/error）数
+var criticalErrorCount = 0;   // 首屏关键图失败数
 var moduleLoadedCount = 0;
 
 var gameEnded = false;
@@ -867,7 +868,7 @@ var gateTriggered = false;
 var deferredNoTimeShown = false;
 
 function isGateImageNode(node){
-  return node && node.getAttribute("data-role") === "hero";
+  return !!node;
 }
 
 var imgMetrics = [];
@@ -893,9 +894,10 @@ function updateProgress(){
   if (topProgressBar) topProgressBar.style.width = pct + "%";
 
   statusLine.textContent =
-    "正在等待首屏最小可用内容加载完成……\n" +
-    "最小可用首屏(hero): " + gateLoadedCount + "/" + gateTarget +
-    " | 其余首屏图片: " + Math.max(0, visualLoadedCount - gateLoadedCount) + "/" + Math.max(0, visualTarget - gateTarget) +
+    "正在等待首屏所有关键图片真正加载完成……\n" +
+    "首屏关键图成功: " + gateLoadedCount + "/" + gateTarget +
+    " | 首屏已完成(含失败): " + visualFinishedCount + "/" + visualTarget +
+    " | 首屏失败: " + criticalErrorCount +
     " | 下方模块已加载: " + moduleLoadedCount + "（不影响开始）" +
     " | 开始门控进度: " + pct + "%";
 }
@@ -912,9 +914,14 @@ function finalizeImage(idx, ok){
   imgMetrics[idx - 1].status = ok ? "load" : "error";
   imgMetrics[idx - 1].endMs = performance.now() - navStartTime;
 
-  visualLoadedCount++;
-  if (imgMetrics[idx - 1].isGate){
-    gateLoadedCount++;
+  visualFinishedCount++;
+  if (ok){
+    visualLoadedCount++;
+    if (imgMetrics[idx - 1].isGate){
+      gateLoadedCount++;
+    }
+  } else {
+    criticalErrorCount++;
   }
 
   markCriticalWrap(idx, ok);
@@ -934,10 +941,8 @@ function loadCriticalImage(img, idx){
   var artificialDelay;
 
   if (role === "hero"){
-    // hero 更早加载：首屏最小可用
     artificialDelay = 120 + (level - 1) * 60;
   } else {
-    // 其它图继续慢慢到达，但不阻塞开始
     artificialDelay = 550 + idx * 220 + (level - 1) * 100;
   }
 
@@ -945,12 +950,34 @@ function loadCriticalImage(img, idx){
     ? makeImageUrl(100 + idx, 1600, 900)
     : makeImageUrl(100 + idx, 800, 800);
 
+  var attempts = 0;
+  var maxAttempts = 3;
+
+  function attachOnce(){
+    img.addEventListener("load", handleLoad, { once:true });
+    img.addEventListener("error", handleError, { once:true });
+  }
+
+  function handleLoad(){
+    finalizeImage(idx, true);
+  }
+
+  function handleError(){
+    attempts++;
+    if (attempts < maxAttempts){
+      attachOnce();
+      setTimeout(function(){
+        img.src = url + "&retry=" + attempts + "&ts=" + Date.now();
+      }, 180 + attempts * 160);
+      return;
+    }
+    finalizeImage(idx, false);
+  }
+
+  attachOnce();
   setTimeout(function(){
     img.src = url;
   }, artificialDelay);
-
-  img.addEventListener("load", function(){ finalizeImage(idx, true); }, { once:true });
-  img.addEventListener("error", function(){ finalizeImage(idx, false); }, { once:true });
 }
 
 for (var j = 0; j < criticalNodes.length; j++){
@@ -1081,15 +1108,27 @@ function startLoadCountdown(){
 }
 startLoadCountdown();
 
+function afterStrictGatePaint(cb){
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      cb();
+    });
+  });
+}
+
 function tryTriggerGate(){
   if (gateTriggered || gameEnded) return;
 
-  if (gateLoadedCount >= gateTarget){
+  if (gateLoadedCount >= gateTarget && criticalErrorCount === 0){
     gateTriggered = true;
     forceStartBtn.disabled = false;
     freezeLoadCountdown();
-    badgeState.textContent = "State: ready";
-    onGateReady();
+    badgeState.textContent = "State: ready_after_first_paint";
+    afterStrictGatePaint(function(){
+      if (gameEnded) return;
+      badgeState.textContent = "State: ready";
+      onGateReady();
+    });
   }
 }
 
@@ -1178,12 +1217,12 @@ function startGame(){
   var used = now - navStartTime;
   var leftover = levelTimeLimit - used;
 
-  panelTitle.textContent = "第 " + level + " 关：最小可用首屏已完成";
+  panelTitle.textContent = "第 " + level + " 关：首屏所有关键图已完成";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
     "Used until gate: " + Math.round(used) + "ms\n" +
-    "Minimum usable hero: " + gateLoadedCount + "/" + gateTarget + "\n" +
-    "Other first-screen images loaded: " + Math.max(0, visualLoadedCount - gateLoadedCount) + "/" + Math.max(0, visualTarget - gateTarget) + "\n" +
+    "All first-screen critical images loaded: " + gateLoadedCount + "/" + gateTarget + "\n" +
+    "First-screen finished (load/error): " + visualFinishedCount + "/" + visualTarget + "\n" +
     "Modules: " + moduleLoadedCount + "（not required）";
 
   if (leftover <= 0){
@@ -1201,7 +1240,7 @@ function startGame(){
 
   gameStatus.textContent =
     "数字即将隐藏。请记住 3 位数。\n" +
-    "本版本采用首屏最小可用门控：hero 主图完成后即开始。";
+    "本版本采用严格首屏门控：首屏所有关键图片真正加载完成后才开始。";
 
   setTimeout(function(){
     if (gameEnded) return;
@@ -1229,7 +1268,7 @@ function formatReport(){
   lines.push("LoadTime(ms): " + loadTime);
   lines.push("ActualDisplayTime(ms): " + (metrics.actualDisplayTime != null ? Math.round(metrics.actualDisplayTime) : "N/A"));
   lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
-  lines.push("GateLoadedAtStart(hero only): " + metrics.gateLoadedCount + "/" + gateTarget);
+  lines.push("GateLoadedAtStart(all critical success): " + metrics.gateLoadedCount + "/" + gateTarget);
   lines.push("AllFirstScreenImagesLoadedAtStart: " + metrics.visualLoadedCount + "/" + visualTarget);
   lines.push("ModulesLoadedAtGate: " + metrics.moduleLoadedCount + "（not required）");
   lines.push("");
@@ -1289,8 +1328,8 @@ function showDeferredLoadNoTimeAfterGate(){
   gameNumber.style.display = "block";
 
   gameStatus.textContent =
-    "本实验只评估首屏最小可用内容出现前的等待体验。\n" +
-    "在 hero 主图可用时，加载耗时已超过预算，因此判定为加载阶段超时。";
+    "本实验评估首屏所有关键图片真正加载完成前的等待体验。\n" +
+    "在首屏全部关键图片完成前，加载耗时已超过预算，因此判定为加载阶段超时。";
 
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
@@ -1373,10 +1412,8 @@ forceStartBtn.addEventListener("click", function(){
     if (imgMetrics[i].status === "pending"){
       imgMetrics[i].status = "forced";
       imgMetrics[i].endMs = performance.now() - navStartTime;
-      visualLoadedCount++;
-      if (imgMetrics[i].isGate){
-        gateLoadedCount++;
-      }
+      visualFinishedCount++;
+      criticalErrorCount++;
       markCriticalWrap(i + 1, false);
     }
   }
