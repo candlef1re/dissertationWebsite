@@ -1211,7 +1211,6 @@ function tryTriggerGate(){
   if (criticalLoadedCount >= criticalTarget && moduleLoadedCount >= moduleTarget){
     gateTriggered = true;
     forceStartBtn.disabled = false;
-    freezeLoadCountdown();
     badgeState.textContent = "State: ready";
     onGateReady();
   }
@@ -1235,7 +1234,8 @@ var metrics = {
   moduleLoadedCount: 0,
   imgMetrics: imgMetrics,
   moduleMetrics: moduleMetrics,
-  lazySectionMetrics: lazySectionMetrics
+  lazySectionMetrics: lazySectionMetrics,
+  leftoverAtStartGame: null,
 };
 
 /* =========================
@@ -1255,6 +1255,23 @@ var nextBtn = document.getElementById("next-btn");
 var feedbackEl = document.getElementById("feedback");
 
 var currentCode = "";
+
+var numberHideWatcher = null;
+
+function hideNumberAndEnableInput(){
+  if (gameEnded) return;
+
+  gameNumber.style.display = "none";
+  guessInput.value = "";
+  guessInput.focus();
+
+  metrics.numberHiddenAt = performance.now() - navStartTime;
+  badgeRemaining.textContent = "Remaining(load): 0ms";
+  timeUp = true;
+  timeUpAt = performance.now() - navStartTime;
+
+  gameStatus.textContent = "请输入刚才看到的 3 位数字：";
+}
 
 function generateCode(){
   currentCode = Math.floor(100 + Math.random() * 900).toString();
@@ -1296,12 +1313,13 @@ function startGame(){
 
   var now = performance.now();
   var used = now - navStartTime;
-  var leftover = levelTimeLimit - used;
+  var leftover = Math.max(0, levelTimeLimit - used);
 
   panelTitle.textContent = "第 " + level + " 关：首屏关键路径已完成";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
     "Used until gate: " + Math.round(used) + "ms\n" +
+    "Remaining(now): " + Math.round(leftover) + "ms\n" +
     "Critical: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
     "Critical Modules: " + moduleLoadedCount + "/" + moduleTarget;
 
@@ -1310,8 +1328,9 @@ function startGame(){
     return;
   }
 
-  var actualDisplay = Math.min(idealDisplayTime, leftover);
-  metrics.actualDisplayTime = actualDisplay;
+  // 数字显示时间与 levelTimeLimit 同步
+  metrics.actualDisplayTime = leftover;
+  metrics.leftoverAtStartGame = leftover;
 
   generateCode();
   gameNumber.style.display = "block";
@@ -1319,17 +1338,27 @@ function startGame(){
   metrics.numberShownAt = performance.now() - navStartTime;
 
   gameStatus.textContent =
-    "数字即将隐藏。请记住 3 位数。\n" +
+    "数字会一直显示到本关倒计时真正结束。\n" +
     "本版本已应用 preload、图片优化与非首屏滚动延迟加载。";
 
-  setTimeout(function(){
+  if (numberHideWatcher){
+    cancelAnimationFrame(numberHideWatcher);
+    numberHideWatcher = null;
+  }
+
+  function watchNumber(){
     if (gameEnded) return;
-    gameNumber.style.display = "none";
-    guessInput.value = "";
-    guessInput.focus();
-    metrics.numberHiddenAt = performance.now() - navStartTime;
-    gameStatus.textContent = "请输入刚才看到的 3 位数字：";
-  }, actualDisplay);
+
+    var remaining = getLoadRemainingMs();
+    if (remaining <= 0){
+      hideNumberAndEnableInput();
+      return;
+    }
+
+    numberHideWatcher = requestAnimationFrame(watchNumber);
+  }
+
+  numberHideWatcher = requestAnimationFrame(watchNumber);
 }
 
 function formatReport(){
@@ -1361,6 +1390,11 @@ function formatReport(){
   lines.push("RTT(ms): " + networkRTT);
   lines.push("Downlink(Mb/s): " + networkDownlink);
   lines.push("EffectiveType: " + effectiveType);
+  lines.push("LeftoverTimeAtGameStart(ms): " + (
+    metrics.leftoverAtStartGame != null
+      ? Math.round(metrics.leftoverAtStartGame)
+      : "N/A"
+  ));
   return lines.join("\n");
 }
 
@@ -1496,7 +1530,6 @@ forceStartBtn.addEventListener("click", function(){
   }
 
   updateProgress();
-  freezeLoadCountdown();
   badgeState.textContent = "State: forced";
   metrics.gateReadyAt = performance.now() - navStartTime;
   metrics.loadDurationAtGate = metrics.gateReadyAt;
