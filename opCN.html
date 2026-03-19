@@ -1073,7 +1073,6 @@ function tryTriggerGate(){
   if (criticalLoadedCount >= criticalTarget && moduleLoadedCount >= moduleTarget){
     gateTriggered = true;
     forceStartBtn.disabled = false;
-    freezeLoadCountdown();
     badgeState.textContent = "State: ready";
     onGateReady();
   }

@@ -1082,7 +1082,6 @@ function tryTriggerGate(){
   if (successLoadedCount >= trackedImageTarget && imageErrorCount === 0){
     gateTriggered = true;
     forceStartBtn.disabled = false;
-    freezeLoadCountdown();
     badgeState.textContent = "State: ready";
     onGateReady();
   }
@@ -1173,21 +1172,21 @@ function startGame(){
   var used = now - navStartTime;
   var leftover = levelTimeLimit - used;
 
-  panelTitle.textContent = "第 " + level + " 关：9 张图片已全部成功加载";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
     "Used until gate: " + Math.round(used) + "ms\n" +
-    "Critical: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
-    "Modules: " + moduleLoadedCount + "/" + moduleTarget;
+    "Remaining(now): " + Math.round(leftover) + "ms\n" +
+    "Critical: " + successLoadedCount + "/" + trackedImageTarget + "\n" +
+    "Modules: " + moduleLoadedCount;
 
   if (leftover <= 0){
     endByNoTime();
     return;
   }
 
-  var actualDisplay = Math.min(idealDisplayTime, leftover);
+  var actualDisplay = leftover;
   metrics.actualDisplayTime = actualDisplay;
-
+  
   generateCode();
   gameNumber.style.display = "block";
   gameNumber.textContent = currentCode;
@@ -1199,10 +1198,15 @@ function startGame(){
 
   setTimeout(function(){
     if (gameEnded) return;
+
     gameNumber.style.display = "none";
     guessInput.value = "";
     guessInput.focus();
+
     metrics.numberHiddenAt = performance.now() - navStartTime;
+    badgeRemaining.textContent = "Remaining(load): 0ms";
+    timeUp = true;
+
     gameStatus.textContent = "请输入刚才看到的 3 位数字：";
   }, actualDisplay);
 }
@@ -1237,6 +1241,7 @@ function formatReport(){
   lines.push("Downlink(Mb/s): " + networkDownlink);
   lines.push("EffectiveType: " + effectiveType);
   lines.push("");
+  lines.push("LeftoverTime(ms): " + leftover);
   return lines.join("\n");
 }
 
