@@ -926,7 +926,7 @@
             <input id="guess-input" placeholder="请输入刚才看到的 3 位数字" />
             <button class="primary" id="submit-btn">提交</button>
             <button id="close-btn" style="display:none;">关闭</button>
-            <button id="restart-btn" style="display:none;">重来（第 1 关）</button>
+            <button id="restart-btn" style="display:none;">返回主页（失败截图后点击）</button>
             <button id="next-btn" style="display:none;">下一关</button>
           </div>
 
@@ -1493,10 +1493,7 @@ closeBtn.addEventListener("click", function(){
 
 restartBtn.addEventListener("click", function(){
   try{ localStorage.removeItem(STATS_KEY); }catch(e){}
-  var url = new URL(window.location.href);
-  url.searchParams.set("level", 1);
-  url.searchParams.set("run", String(Date.now()));
-  window.location.href = url.toString();
+  window.location.href = "index.html";
 });
 
 nextBtn.addEventListener("click", function(){
