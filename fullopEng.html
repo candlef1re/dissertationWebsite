@@ -9,6 +9,8 @@
   <link rel="dns-prefetch" href="//picsum.photos">
 
   <script>
+    var SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxW3sHECNsjnr6eWC4w4dYe4z2zz1BXIFunbT4qMRx-L6vpcD9un9kxo9G9K6in3R9Mvg/exec";
+
     function getIntParam(name, fallback){
       var params = new URLSearchParams(window.location.search);
       var v = parseInt(params.get(name), 10);
@@ -33,6 +35,7 @@
     }
 
 
+    
 
     var HERO_SMALL = makeImageUrl(401, 720, 405);
     var HERO_LARGE = makeImageUrl(401, 960, 540);
@@ -961,15 +964,32 @@ var STATS_KEY = "slow_site_game_stats_full_optimized_v1";
 function loadStats(){
   try{
     var raw = localStorage.getItem(STATS_KEY);
-    if(!raw) return { totalDisplayMs: 0, displayCount: 0, maxLevelReached: 0 };
+    if (!raw) {
+      return {
+        totalDisplayMs: 0,
+        displayCount: 0,
+        totalLoadMs: 0,
+        loadCount: 0,
+        maxLevelReached: 0
+      };
+    }
+
     var s = JSON.parse(raw);
     return {
       totalDisplayMs: Number(s.totalDisplayMs) || 0,
       displayCount: Number(s.displayCount) || 0,
+      totalLoadMs: Number(s.totalLoadMs) || 0,
+      loadCount: Number(s.loadCount) || 0,
       maxLevelReached: Number(s.maxLevelReached) || 0
     };
   }catch(e){
-    return { totalDisplayMs: 0, displayCount: 0, maxLevelReached: 0 };
+    return {
+      totalDisplayMs: 0,
+      displayCount: 0,
+      totalLoadMs: 0,
+      loadCount: 0,
+      maxLevelReached: 0
+    };
   }
 }
 
@@ -977,16 +997,25 @@ function saveStats(s){
   try{ localStorage.setItem(STATS_KEY, JSON.stringify(s)); }catch(e){}
 }
 
-function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull){
+function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull, loadTimeOrNull){
   var s = loadStats();
-  s.maxLevelReached = Math.max(s.maxLevelReached, currentLevel);
+
+  s.maxLevelReached = Math.max(Number(s.maxLevelReached) || 0, currentLevel);
+
   if (typeof actualDisplayTimeOrNull === "number" && isFinite(actualDisplayTimeOrNull) && actualDisplayTimeOrNull > 0){
-    s.totalDisplayMs += actualDisplayTimeOrNull;
-    s.displayCount += 1;
+    s.totalDisplayMs = (Number(s.totalDisplayMs) || 0) + actualDisplayTimeOrNull;
+    s.displayCount = (Number(s.displayCount) || 0) + 1;
   }
+
+  if (typeof loadTimeOrNull === "number" && isFinite(loadTimeOrNull) && loadTimeOrNull > 0){
+    s.totalLoadMs = (Number(s.totalLoadMs) || 0) + loadTimeOrNull;
+    s.loadCount = (Number(s.loadCount) || 0) + 1;
+  }
+
   saveStats(s);
   return s;
 }
+
 
 var deviceInfo = {
   hardwareConcurrency: navigator.hardwareConcurrency || "N/A",
@@ -1070,10 +1099,6 @@ function finalizeImage(idx, ok){
   tryTriggerGate();
 }
 
-/* =========================
-   6) Critical image loading
-   preload + smaller sizes + srcset
-========================= */
 function loadCriticalImage(img, idx){
   var artificialDelay = idx === 1 ? 20 : 60;
 
@@ -1099,9 +1124,6 @@ for (var j = 0; j < criticalNodes.length; j++){
 
 updateProgress();
 
-/* =========================
-   7) Critical modules only
-========================= */
 function recordModuleLoaded(id){
   moduleLoadedCount++;
   moduleMetrics.push({
@@ -1262,6 +1284,33 @@ function showOverlayBase(){
   closeBtn.style.display = "inline-block";
 }
 
+function showDeferredLoadNoTimeAfterGate(){
+  if (deferredNoTimeShown || gameEnded) return;
+  deferredNoTimeShown = true;
+
+  showOverlayBase();
+  panelTitle.textContent = "Ended: Timeout during loading stage";
+  panelMini.textContent =
+    "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
+    "Gate finished at: " + Math.round(metrics.gateReadyAt) + "ms\n" +
+    "Time up first observed at: " + (timeUpAt != null ? Math.round(timeUpAt) + "ms" : "N/A");
+
+  gameNumber.textContent = "— — —";
+  gameNumber.style.display = "block";
+
+  gameStatus.textContent =
+    "When the first-screen critical gate was completed, the loading time had already exceeded the budget, so this is judged as a timeout during the loading stage.";
+
+  submitBtn.style.display = "none";
+  guessInput.style.display = "none";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "inline-block";
+
+  metrics.actualDisplayTime = null;
+  finishRound("no_time_load");
+}
+
+
 function onGateReady(){
   if (gameEnded) return;
 
@@ -1342,45 +1391,79 @@ function startGame(){
 
 function formatReport(){
   var loadTime = metrics.loadDurationAtGate != null ? Math.round(metrics.loadDurationAtGate) : "N/A";
-  var avgStats = updateStatsAfterRound(level, metrics.actualDisplayTime);
-  var avgDisplay = avgStats.displayCount > 0
-    ? Math.round(avgStats.totalDisplayMs / avgStats.displayCount)
+  var stats = loadStats();
+
+  var avgDisplay = stats.displayCount > 0
+    ? Math.round(stats.totalDisplayMs / stats.displayCount)
+    : "N/A";
+
+  var avgLoad = stats.loadCount > 0
+    ? Math.round(stats.totalLoadMs / stats.loadCount)
     : "N/A";
 
   var lines = [];
-  lines.push("Full optimized version")
+  lines.push("Full optimized version");
   lines.push("===== Experiment Metrics =====");
   lines.push("");
   lines.push("Version: full_optimized_preload_imageopt");
   lines.push("LevelReached: " + level);
   lines.push("Result: " + (metrics.result || "N/A"));
   lines.push("LoadTime(ms): " + loadTime);
+  lines.push("AverageLoadTime(ms): " + avgLoad);
   lines.push("ActualDisplayTime(ms): " + (metrics.actualDisplayTime != null ? Math.round(metrics.actualDisplayTime) : "N/A"));
   lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
-  lines.push("CriticalLoadedAtGate: " + metrics.criticalLoadedCount + "/" + criticalTarget);
-  lines.push("CriticalModulesAtGate: " + metrics.moduleLoadedCount + "/" + moduleTarget);
-  lines.push("");
-  lines.push("----- Device Performance -----");
   lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);
-  lines.push("DeviceMemory(GB): " + deviceInfo.deviceMemory);
-  lines.push("Browser: " + deviceInfo.userAgent);
-  lines.push("");
-  lines.push("----- Network API -----");
   lines.push("RTT(ms): " + networkRTT);
-  lines.push("Downlink(Mb/s): " + networkDownlink);
-  lines.push("EffectiveType: " + effectiveType);
-  lines.push("LeftoverTimeAtGameStart(ms): " + (
-    metrics.leftoverAtStartGame != null
-      ? Math.round(metrics.leftoverAtStartGame)
-      : "N/A"
-  ));
+
   return lines.join("\n");
 }
 
-function finishRound(result){
+
+async function uploadResultToGoogleSheets() {
+  var stats = loadStats();
+
+  var avgDisplay = stats.displayCount > 0
+    ? Math.round(stats.totalDisplayMs / stats.displayCount)
+    : null;
+
+  var avgLoad = stats.loadCount > 0
+    ? Math.round(stats.totalLoadMs / stats.loadCount)
+    : null;
+
+  var payload = {
+    version: "full",
+    rtt: networkRTT,
+    cpu: deviceInfo.hardwareConcurrency,
+    averageLoadTime: avgLoad,
+    averageDisplayTime: avgDisplay
+    
+  };
+
+  try {
+    const res = await fetch(SHEETS_WEBAPP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) return false;
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
+async function finishRound(result){
   if (gameEnded) return;
   gameEnded = true;
   metrics.result = result;
+
+  updateStatsAfterRound(
+    level,
+    metrics.actualDisplayTime,
+    metrics.loadDurationAtGate
+  );
 
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
@@ -1400,32 +1483,21 @@ function finishRound(result){
   }catch(e){
     feedbackEl.textContent = "ReportError: " + (e && e.message ? e.message : String(e));
   }
-}
 
-function showDeferredLoadNoTimeAfterGate(){
-  if (deferredNoTimeShown || gameEnded) return;
-  deferredNoTimeShown = true;
+  var isFailure =
+    result === "wrong" ||
+    result === "no_time" ||
+    result === "no_time_load";
 
-  showOverlayBase();
-  panelTitle.textContent = "Ended: Timeout during loading stage";
-  panelMini.textContent =
-    "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
-    "Gate finished at: " + Math.round(metrics.gateReadyAt) + "ms\n" +
-    "Time up first observed at: " + (timeUpAt != null ? Math.round(timeUpAt) + "ms" : "N/A");
-
-  gameNumber.textContent = "— — —";
-  gameNumber.style.display = "block";
-
-  gameStatus.textContent =
-    "When the first-screen critical gate was completed, the loading time had already exceeded the budget, so this is judged as a timeout during the loading stage.";
-
-  submitBtn.style.display = "none";
-  guessInput.style.display = "none";
-  nextBtn.style.display = "none";
-  restartBtn.style.display = "inline-block";
-
-  metrics.actualDisplayTime = null;
-  finishRound("no_time_load");
+  if (isFailure){
+    var ok = await uploadResultToGoogleSheets();
+    if (ok){
+      gameStatus.textContent += "\n\nData uploaded successfully.";
+      try{ localStorage.removeItem(STATS_KEY); }catch(e){}
+    } else {
+      gameStatus.textContent += "\n\nUpload failed. Please keep a screenshot.";
+    }
+  }
 }
 
 function endByNoTime(){
