@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dissertation Experiment Website</title>
+  <title>毕设实验网站</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
@@ -160,7 +160,6 @@
       justify-content:space-between;
       gap:10px;
       margin-bottom:10px;
-
     }
     .card-title h2,
     .card-title h3{
@@ -330,7 +329,7 @@
       gap:16px;
     }
     .content-feed h3{
-        color:#eef4ff
+      color:#eef4ff
     }
 
     .feed-grid{
@@ -537,12 +536,11 @@
     }
   </style>
 </head>
-
 <body>
   <div class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1>Dissertation Test</h1>
+        <h1>Final Year Project Test</h1>
         <div class="sub">Welcome, this is a test website</div>
       </div>
 
@@ -561,7 +559,7 @@
 
   <main class="page">
     <div class="searchbar">
-      <input id="fake-search-input" placeholder="Enter keywords to search (simulate slow response)" />
+      <input id="fake-search-input" placeholder="Enter keywords to search (simulated slow response)" />
       <button class="btn-like primary" id="fake-search-btn">Search</button>
       <button class="btn-like warn" id="fake-filter-btn">Filter</button>
     </div>
@@ -573,7 +571,7 @@
           <img class="critical" data-idx="1" data-role="hero" alt="hero banner">
           <div class="hero-overlay">
             <h2>Homepage Image</h2>
-            <p>This website is for dissertation purposes only</p>
+            <p>This website is for final year project use only</p>
           </div>
         </div>
       </div>
@@ -605,14 +603,14 @@
             </div>
             <div>
               <h4>This is another image</h4>
-              <p>Take your time loading</p>
+              <p>Please wait while it loads</p>
             </div>
           </div>
         </div>
 
         <div class="card card-pad">
           <div class="card-title">
-            <h3>Above-the-fold Card</h3>
+            <h3>First-Screen Cards</h3>
             <span class="tiny">Critical</span>
           </div>
 
@@ -623,7 +621,7 @@
             </div>
             <div>
               <h4>Image 1</h4>
-              <p>This is a critical image that must be loaded</p>
+              <p>This is a required critical image</p>
             </div>
           </div>
 
@@ -673,10 +671,10 @@
 
         <section class="card card-pad module loading" id="module-gallery">
           <div class="card-title">
-            <h3>Image and Text Cards</h3>
+            <h3>Image Cards</h3>
             <span class="tiny">Module D</span>
           </div>
-          <div class="module-body">Loading image and text cards...</div>
+          <div class="module-body">Loading image cards...</div>
         </section>
       </section>
 
@@ -691,17 +689,17 @@
 
         <section class="card card-pad module loading" id="module-sidefeed">
           <div class="card-title">
-            <h3>Hot Topics and Recommendations</h3>
+            <h3>Trending and Recommendations</h3>
             <span class="tiny">Module F</span>
           </div>
-          <div class="module-body">Loading sidebar recommendations...</div>
+          <div class="module-body">Loading side recommendations...</div>
         </section>
       </aside>
     </section>
 
     <div class="statusbar">
       <div class="status-left">
-        <div class="status-line" id="status-line">Waiting for critical above-the-fold resources and modules to finish loading...</div>
+        <div class="status-line" id="status-line">Waiting for all first-screen critical images to fully load...</div>
         <div class="progress" aria-label="load progress">
           <div id="progress-bar"></div>
         </div>
@@ -712,12 +710,12 @@
 
       <div class="controls">
         <button class="btn-like" id="restart-page">Restart (Level 1)</button>
-        <button class="btn-like primary" id="force-start" disabled>Force Start (Debug)</button>
+        <button class="btn-like primary" id="force-start" disabled>Force Start (Debug Only)</button>
       </div>
     </div>
 
     <div class="footer-area">
-      This page is a generic unoptimized website model for experimental use.
+      This page is a semi-optimized website model for experimental use (using the unop layout style). The current version has been changed so that the number will only appear after all first-screen critical images have fully loaded.
     </div>
   </main>
 
@@ -737,7 +735,7 @@
             <input id="guess-input" placeholder="Please enter the 3-digit number you just saw" />
             <button class="primary" id="submit-btn">Submit</button>
             <button id="close-btn" style="display:none;">Close</button>
-            <button id="restart-btn" style="display:none;">Restart (Level 1)</button>
+            <button id="restart-btn" style="display:none;">Return to Homepage (click after taking a failure screenshot)</button>
             <button id="next-btn" style="display:none;">Next Level</button>
           </div>
 
@@ -746,7 +744,7 @@
 
         <div class="block">
           <div class="block-title">Full Feedback</div>
-          <div class="feedback" id="feedback">(Complete information will be shown here after the game ends)</div>
+          <div class="feedback" id="feedback">(Complete information will be displayed here after the game ends)</div>
         </div>
       </div>
     </div>
@@ -768,7 +766,7 @@ var level = getIntParam("level", 1);
 if (level < 1) level = 1;
 var run = getStrParam("run", String(Date.now()));
 
-//故意做一点主线程阻塞
+// Intentionally add some main-thread blocking
 (function heavySyncTask(){
   var temp = [];
   for (var round = 0; round < 18; round++){
@@ -784,13 +782,13 @@ function expBudget(level, startMs, ratio, minMs){
   var raw = startMs * Math.pow(ratio, level - 1);
   return Math.max(minMs, Math.round(raw));
 }
-var levelTimeLimit = expBudget(level, 7000, 0.8, 500);
+var levelTimeLimit = expBudget(level, 13000, 0.8, 500);
 var idealDisplayTime = expBudget(level, 1000, 0.90, 150);
 
 var navEntry = performance.getEntriesByType("navigation")[0];
 var navStartTime = navEntry ? navEntry.startTime : 0;
 
-//badges
+// badges
 var badgeLevel = document.getElementById("badge-level");
 var badgeBudget = document.getElementById("badge-budget");
 var badgeRemaining = document.getElementById("badge-remaining");
@@ -801,7 +799,7 @@ badgeBudget.textContent = "Budget: " + levelTimeLimit + "ms";
 badgeRemaining.textContent = "Remaining: ...";
 badgeState.textContent = "State: loading";
 
-//statistics
+// statistics
 var STATS_KEY = "slow_site_game_stats_v1";
 
 function loadStats(){
@@ -832,7 +830,7 @@ function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull){
   return s;
 }
 
-//network
+// network
 var deviceInfo = {
   hardwareConcurrency: navigator.hardwareConcurrency || "N/A",
   deviceMemory: navigator.deviceMemory || "N/A",
@@ -843,20 +841,34 @@ var networkRTT = conn && typeof conn.rtt === "number" ? conn.rtt : "N/A";
 var networkDownlink = conn && typeof conn.downlink === "number" ? conn.downlink : "N/A";
 var effectiveType = conn && conn.effectiveType ? conn.effectiveType : "N/A";
 
-//critical resources
+// First-screen images
 var criticalNodes = document.querySelectorAll("img.critical");
-var criticalTarget = criticalNodes.length; // 当前共 5 张关键图
-var moduleTarget = 4; // 6个模块里达到4个即可开始
+var gateNodes = criticalNodes;
+
+// Strict first-screen gate: the process can only start after all first-screen critical images have successfully loaded
+var gateTarget = gateNodes.length > 0 ? gateNodes.length : 1;
+
+var visualTarget = criticalNodes.length;
+var moduleTarget = 0;
+
 var statusLine = document.getElementById("status-line");
 var progressBar = document.getElementById("progress-bar");
 var topProgressBar = document.getElementById("top-progress-bar");
 var forceStartBtn = document.getElementById("force-start");
 
-var criticalLoadedCount = 0;
+var gateLoadedCount = 0;      // Gate completion count (all first-screen critical images successfully loaded)
+var visualLoadedCount = 0;    // Number of successfully loaded first-screen images
+var visualFinishedCount = 0;  // Number of completed first-screen images (load/error)
+var criticalErrorCount = 0;   // Number of failed first-screen critical images
 var moduleLoadedCount = 0;
+
 var gameEnded = false;
 var gateTriggered = false;
 var deferredNoTimeShown = false;
+
+function isGateImageNode(node){
+  return !!node;
+}
 
 var imgMetrics = [];
 for (var i = 0; i < criticalNodes.length; i++){
@@ -864,15 +876,16 @@ for (var i = 0; i < criticalNodes.length; i++){
     idx: i + 1,
     status: "pending",
     endMs: null,
-    role: criticalNodes[i].getAttribute("data-role") || "critical"
+    role: criticalNodes[i].getAttribute("data-role") || "critical",
+    isGate: isGateImageNode(criticalNodes[i])
   });
 }
 
 function currentGateScore(){
-  return criticalLoadedCount + moduleLoadedCount;
+  return gateLoadedCount;
 }
 function gateTotal(){
-  return criticalTarget + moduleTarget;
+  return gateTarget;
 }
 function updateProgress(){
   var pct = Math.round((currentGateScore() / gateTotal()) * 100);
@@ -880,45 +893,90 @@ function updateProgress(){
   if (topProgressBar) topProgressBar.style.width = pct + "%";
 
   statusLine.textContent =
-    "Waiting for critical above-the-fold resources and modules to finish loading...\n" +
-    "Critical images: " + criticalLoadedCount + "/" + criticalTarget +
-    " | Modules: " + moduleLoadedCount + "/" + moduleTarget +
-    " | Total progress: " + pct + "%";
+    "Waiting for all first-screen critical images to fully load...\n" +
+    "First-screen critical images loaded successfully: " + gateLoadedCount + "/" + gateTarget +
+    " | First-screen completed (including failures): " + visualFinishedCount + "/" + visualTarget +
+    " | First-screen failures: " + criticalErrorCount +
+    " | Lower modules loaded: " + moduleLoadedCount + " (does not affect start)" +
+    " | Gate progress: " + pct + "%";
 }
+
 function markCriticalWrap(idx, ok){
   var wrap = document.getElementById("critical-wrap-" + idx);
   if (!wrap) return;
   wrap.classList.add(ok ? "loaded" : "error");
 }
+
 function finalizeImage(idx, ok){
   if (imgMetrics[idx - 1].status !== "pending") return;
+
   imgMetrics[idx - 1].status = ok ? "load" : "error";
   imgMetrics[idx - 1].endMs = performance.now() - navStartTime;
-  criticalLoadedCount++;
+
+  visualFinishedCount++;
+  if (ok){
+    visualLoadedCount++;
+    if (imgMetrics[idx - 1].isGate){
+      gateLoadedCount++;
+    }
+  } else {
+    criticalErrorCount++;
+  }
+
   markCriticalWrap(idx, ok);
   updateProgress();
   tryTriggerGate();
 }
 
 /* =========================
-   7) 模拟慢图片加载
+   模拟慢图片加载
 ========================= */
 function makeImageUrl(seed, w, h){
   return "https://picsum.photos/" + w + "/" + h + "?random=" + seed + "&lv=" + encodeURIComponent(level) + "&run=" + encodeURIComponent(run);
 }
 
 function loadCriticalImage(img, idx){
-  var artificialDelay = 450 + idx * 180 + (level - 1) * 90;
+  var role = img.getAttribute("data-role") || "thumb";
+  var artificialDelay;
+
+  if (role === "hero"){
+    artificialDelay = 120 + (level - 1) * 60;
+  } else {
+    artificialDelay = 550 + idx * 220 + (level - 1) * 100;
+  }
+
   var url = (idx === 1)
     ? makeImageUrl(100 + idx, 1600, 900)
     : makeImageUrl(100 + idx, 800, 800);
 
+  var attempts = 0;
+  var maxAttempts = 3;
+
+  function attachOnce(){
+    img.addEventListener("load", handleLoad, { once:true });
+    img.addEventListener("error", handleError, { once:true });
+  }
+
+  function handleLoad(){
+    finalizeImage(idx, true);
+  }
+
+  function handleError(){
+    attempts++;
+    if (attempts < maxAttempts){
+      attachOnce();
+      setTimeout(function(){
+        img.src = url + "&retry=" + attempts + "&ts=" + Date.now();
+      }, 180 + attempts * 160);
+      return;
+    }
+    finalizeImage(idx, false);
+  }
+
+  attachOnce();
   setTimeout(function(){
     img.src = url;
   }, artificialDelay);
-
-  img.addEventListener("load", function(){ finalizeImage(idx, true); }, { once:true });
-  img.addEventListener("error", function(){ finalizeImage(idx, false); }, { once:true });
 }
 
 for (var j = 0; j < criticalNodes.length; j++){
@@ -953,9 +1011,9 @@ var baseModuleDelay = 700 + (level - 1) * 120;
 fakeModuleLoad("module-nav", baseModuleDelay + 0,
   '<div class="side-list">' +
     '<div class="list-item">Main Homepage<div class="muted">Entry loaded</div></div>' +
-    '<div class="list-item">Recommended Channel<div class="muted">Category module</div></div>' +
+    '<div class="list-item">Recommended Channels<div class="muted">Category module</div></div>' +
     '<div class="list-item">Latest Updates<div class="muted">Navigation index</div></div>' +
-    '<div class="list-item">Site Topics<div class="muted">Auxiliary entry</div></div>' +
+    '<div class="list-item">Site Topics<div class="muted">Secondary entry</div></div>' +
   '</div>'
 );
 
@@ -971,7 +1029,7 @@ fakeModuleLoad("module-news", baseModuleDelay + 900,
   '<div class="news-list">' +
     '<div class="list-item"><strong>Recommended Content 01</strong><div class="news-meta">Computer Python tutorial</div></div>' +
     '<div class="list-item"><strong>Recommended Content 02</strong><div class="news-meta">Java from graduation to unemployment</div></div>' +
-    '<div class="list-item"><strong>Recommended Content 03</strong><div class="news-meta">Ruby language introduction</div></div>' +
+    '<div class="list-item"><strong>Recommended Content 03</strong><div class="news-meta">Introduction to Ruby</div></div>' +
   '</div>'
 );
 
@@ -988,17 +1046,17 @@ fakeModuleLoad("module-gallery", baseModuleDelay + 1400,
 
 fakeModuleLoad("module-docs", baseModuleDelay + 1900,
   '<div class="doc-list">' +
-    '<div class="list-item"><strong>Attachment Notes.pdf</strong><div class="doc-meta">Simulating slow loading in document and download sections</div></div>' +
+    '<div class="list-item"><strong>Attachment Guide.pdf</strong><div class="doc-meta">Simulating slow loading in the document and download area</div></div>' +
     '<div class="list-item"><strong>Resource List.xlsx</strong><div class="doc-meta">A common attachment module in old systems</div></div>' +
-    '<div class="list-item"><strong>History Records.zip</strong><div class="doc-meta">Not above the fold, but it extends full-page completion time</div></div>' +
+    '<div class="list-item"><strong>History.zip</strong><div class="doc-meta">Not part of the first screen, but it extends the full page completion time</div></div>' +
   '</div>'
 );
 
 fakeModuleLoad("module-sidefeed", baseModuleDelay + 2400,
   '<div class="side-list">' +
-    '<div class="list-item">Trending Recommendation 1<div class="muted">Visible to users but arrives late</div></div>' +
-    '<div class="list-item">Trending Recommendation 2<div class="muted">Typical unoptimized page experience</div></div>' +
-    '<div class="list-item">Trending Recommendation 3<div class="muted">Page content does not finish synchronously</div></div>' +
+    '<div class="list-item">Trending Recommendation 1<div class="muted">Visible to users but arrives later</div></div>' +
+    '<div class="list-item">Trending Recommendation 2<div class="muted">A typical unoptimized page experience</div></div>' +
+    '<div class="list-item">Trending Recommendation 3<div class="muted">Page content does not finish loading synchronously</div></div>' +
   '</div>'
 );
 
@@ -1049,15 +1107,26 @@ function startLoadCountdown(){
 }
 startLoadCountdown();
 
+function afterStrictGatePaint(cb){
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      cb();
+    });
+  });
+}
+
 function tryTriggerGate(){
   if (gateTriggered || gameEnded) return;
 
-  if (criticalLoadedCount >= criticalTarget && moduleLoadedCount >= moduleTarget){
+  if (gateLoadedCount >= gateTarget && criticalErrorCount === 0){
     gateTriggered = true;
     forceStartBtn.disabled = false;
-    freezeLoadCountdown();
-    badgeState.textContent = "State: ready";
-    onGateReady();
+    badgeState.textContent = "State: ready_after_first_paint";
+    afterStrictGatePaint(function(){
+      if (gameEnded) return;
+      badgeState.textContent = "State: ready";
+      onGateReady();
+    });
   }
 }
 
@@ -1072,6 +1141,7 @@ var metrics = {
   loadDurationAtGate: null,
 
   actualDisplayTime: null,
+  leftoverAtStartGame: null,
   numberShownAt: null,
   numberHiddenAt: null,
 
@@ -1079,14 +1149,16 @@ var metrics = {
   userGuess: null,
   result: null,
 
-  criticalLoadedCount: 0,
+  gateLoadedCount: 0,
+  visualLoadedCount: 0,
   moduleLoadedCount: 0,
   imgMetrics: imgMetrics,
-  moduleMetrics: moduleMetrics
+  moduleMetrics: moduleMetrics,
+  leftoverAtStartGame: null,
 };
 
 /* =========================
-   11) 游戏逻辑
+   Game Logic
 ========================= */
 var gameOverlay = document.getElementById("game-overlay");
 var panelTitle = document.getElementById("panel-title");
@@ -1116,7 +1188,8 @@ function onGateReady(){
 
   metrics.gateReadyAt = performance.now() - navStartTime;
   metrics.loadDurationAtGate = metrics.gateReadyAt;
-  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.gateLoadedCount = gateLoadedCount;
+  metrics.visualLoadedCount = visualLoadedCount;
   metrics.moduleLoadedCount = moduleLoadedCount;
 
   var loadTooSlow = metrics.loadDurationAtGate > levelTimeLimit;
@@ -1131,6 +1204,23 @@ function onGateReady(){
   startGame();
 }
 
+var numberHideWatcher = null;
+
+function hideNumberAndEnableInput(){
+  if (gameEnded) return;
+
+  gameNumber.style.display = "none";
+  guessInput.value = "";
+  guessInput.focus();
+
+  metrics.numberHiddenAt = performance.now() - navStartTime;
+  badgeRemaining.textContent = "Remaining(load): 0ms";
+  timeUp = true;
+  timeUpAt = performance.now() - navStartTime;
+
+  gameStatus.textContent = "Please enter the 3-digit number you just saw:";
+}
+
 function startGame(){
   if (gameEnded || timeUp) return;
 
@@ -1142,22 +1232,24 @@ function startGame(){
 
   var now = performance.now();
   var used = now - navStartTime;
-  var leftover = levelTimeLimit - used;
+  var leftover = Math.max(0, levelTimeLimit - used);
 
-  panelTitle.textContent = "Level " + level + ": Critical above-the-fold content is ready";
+  panelTitle.textContent = "Level " + level + ": All first-screen critical images have loaded";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
     "Used until gate: " + Math.round(used) + "ms\n" +
-    "Critical: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
-    "Modules: " + moduleLoadedCount + "/" + moduleTarget;
+    "Remaining(now): " + Math.round(leftover) + "ms\n" +
+    "All first-screen critical images loaded: " + gateLoadedCount + "/" + gateTarget + "\n" +
+    "First-screen finished (load/error): " + visualFinishedCount + "/" + visualTarget + "\n" +
+    "Modules: " + moduleLoadedCount + " (not required)";
 
   if (leftover <= 0){
     endByNoTime();
     return;
   }
 
-  var actualDisplay = Math.min(idealDisplayTime, leftover);
-  metrics.actualDisplayTime = actualDisplay;
+  metrics.actualDisplayTime = leftover;
+  metrics.leftoverAtStartGame = leftover;
 
   generateCode();
   gameNumber.style.display = "block";
@@ -1165,17 +1257,28 @@ function startGame(){
   metrics.numberShownAt = performance.now() - navStartTime;
 
   gameStatus.textContent =
-    "The number will be hidden soon. Please remember the 3-digit number.\n" +
-    "This experiment simulates a generic slow website, not just slow image loading.";
+    "The number will remain visible until the countdown for this level truly ends.\n" +
+    "This version uses strict first-screen gating: it starts only after all first-screen critical images have fully loaded.";
 
-  setTimeout(function(){
+  if (numberHideWatcher) {
+    cancelAnimationFrame(numberHideWatcher);
+    numberHideWatcher = null;
+  }
+
+  function watchNumber(){
     if (gameEnded) return;
-    gameNumber.style.display = "none";
-    guessInput.value = "";
-    guessInput.focus();
-    metrics.numberHiddenAt = performance.now() - navStartTime;
-    gameStatus.textContent = "Please enter the 3-digit number you just saw:";
-  }, actualDisplay);
+
+    var remaining = getLoadRemainingMs();
+
+    if (remaining <= 0){
+      hideNumberAndEnableInput();
+      return;
+    }
+
+    numberHideWatcher = requestAnimationFrame(watchNumber);
+  }
+
+  numberHideWatcher = requestAnimationFrame(watchNumber);
 }
 
 function formatReport(){
@@ -1186,6 +1289,7 @@ function formatReport(){
     : "N/A";
 
   var lines = [];
+  lines.push("semioptimized version");
   lines.push("===== Experiment Metrics =====");
   lines.push("");
   lines.push("LevelReached: " + level);
@@ -1193,8 +1297,9 @@ function formatReport(){
   lines.push("LoadTime(ms): " + loadTime);
   lines.push("ActualDisplayTime(ms): " + (metrics.actualDisplayTime != null ? Math.round(metrics.actualDisplayTime) : "N/A"));
   lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
-  lines.push("CriticalLoadedAtGate: " + metrics.criticalLoadedCount + "/" + criticalTarget);
-  lines.push("ModulesLoadedAtGate: " + metrics.moduleLoadedCount + "/" + moduleTarget);
+  lines.push("GateLoadedAtStart(all critical success): " + metrics.gateLoadedCount + "/" + gateTarget);
+  lines.push("AllFirstScreenImagesLoadedAtStart: " + metrics.visualLoadedCount + "/" + visualTarget);
+  lines.push("ModulesLoadedAtGate: " + metrics.moduleLoadedCount + " (not required)");
   lines.push("");
   lines.push("----- Device Performance -----");
   lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);
@@ -1206,16 +1311,11 @@ function formatReport(){
   lines.push("Downlink(Mb/s): " + networkDownlink);
   lines.push("EffectiveType: " + effectiveType);
   lines.push("");
-  lines.push("----- Critical Image Metrics -----");
-  for (var i = 0; i < metrics.imgMetrics.length; i++){
-    var m = metrics.imgMetrics[i];
-    lines.push("IMG" + m.idx + ": " + m.status + " @ " + (m.endMs != null ? Math.round(m.endMs) + "ms" : "N/A"));
-  }
-  lines.push("");
-  lines.push("----- Module Metrics -----");
-  for (var j = 0; j < moduleMetrics.length; j++){
-    lines.push(moduleMetrics[j].id + ": " + moduleMetrics[j].loadedAt + "ms");
-  }
+  lines.push("LeftoverTimeAtGameStart(ms): " + (
+    metrics.leftoverAtStartGame != null
+      ? Math.round(metrics.leftoverAtStartGame)
+      : "N/A"
+  ));
   return lines.join("\n");
 }
 
@@ -1252,7 +1352,7 @@ function showDeferredLoadNoTimeAfterGate(){
   deferredNoTimeShown = true;
 
   showOverlayBase();
-  panelTitle.textContent = "End: Load phase timeout";
+  panelTitle.textContent = "End: Load timeout";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
     "Gate finished at: " + Math.round(metrics.gateReadyAt) + "ms\n" +
@@ -1262,8 +1362,8 @@ function showDeferredLoadNoTimeAfterGate(){
   gameNumber.style.display = "block";
 
   gameStatus.textContent =
-    "This experiment only evaluates the waiting experience before critical above-the-fold loading is completed.\n" +
-    "When the gate was reached, the loading time had already exceeded the budget, so it is judged as a load-phase timeout.";
+    "This experiment evaluates the waiting experience before all first-screen critical images have fully loaded.\n" +
+    "Before all first-screen critical images finished loading, the load time had already exceeded the budget, so this is judged as a timeout during the loading stage.";
 
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
@@ -1276,11 +1376,11 @@ function showDeferredLoadNoTimeAfterGate(){
 
 function endByNoTime(){
   showOverlayBase();
-  panelTitle.textContent = "End: Not enough time";
+  panelTitle.textContent = "End: Insufficient time";
   panelMini.textContent = "Budget(Time Budget): " + levelTimeLimit + "ms";
   gameNumber.textContent = "— — —";
   gameNumber.style.display = "block";
-  gameStatus.textContent = "There is not enough time left in this level to display the number.";
+  gameStatus.textContent = "There is not enough remaining time in this level to display the number.";
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
   nextBtn.style.display = "none";
@@ -1303,7 +1403,7 @@ submitBtn.addEventListener("click", function(){
     finishRound("correct");
   } else {
     panelTitle.textContent = "End: Wrong answer";
-    gameStatus.textContent = "You answered incorrectly. This experiment is over.";
+    gameStatus.textContent = "Your answer is incorrect. This experiment is now over.";
     finishRound("wrong");
   }
 });
@@ -1318,10 +1418,7 @@ closeBtn.addEventListener("click", function(){
 
 restartBtn.addEventListener("click", function(){
   try{ localStorage.removeItem(STATS_KEY); }catch(e){}
-  var url = new URL(window.location.href);
-  url.searchParams.set("level", 1);
-  url.searchParams.set("run", String(Date.now()));
-  window.location.href = url.toString();
+  window.location.href = "index.html";
 });
 
 nextBtn.addEventListener("click", function(){
@@ -1346,7 +1443,8 @@ forceStartBtn.addEventListener("click", function(){
     if (imgMetrics[i].status === "pending"){
       imgMetrics[i].status = "forced";
       imgMetrics[i].endMs = performance.now() - navStartTime;
-      criticalLoadedCount++;
+      visualFinishedCount++;
+      criticalErrorCount++;
       markCriticalWrap(i + 1, false);
     }
   }
@@ -1356,11 +1454,11 @@ forceStartBtn.addEventListener("click", function(){
   }
 
   updateProgress();
-  freezeLoadCountdown();
   badgeState.textContent = "State: forced";
   metrics.gateReadyAt = performance.now() - navStartTime;
   metrics.loadDurationAtGate = metrics.gateReadyAt;
-  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.gateLoadedCount = gateLoadedCount;
+  metrics.visualLoadedCount = visualLoadedCount;
   metrics.moduleLoadedCount = moduleLoadedCount;
   startGame();
 });

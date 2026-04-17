@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>毕设实验网站 - 完整优化版（Preload + 图片优化）</title>
 
-  <!-- 连接优化（Connection Optimization） -->
   <link rel="preconnect" href="https://picsum.photos" crossorigin>
   <link rel="dns-prefetch" href="//picsum.photos">
 
@@ -33,12 +32,7 @@
         "&run=" + encodeURIComponent(__run_pre);
     }
 
-    /* =========================
-       图片优化（Image Optimization）
-       1. 首屏 hero 不再请求超大图，而是按展示需求缩小尺寸
-       2. 侧边关键图也缩小
-       3. below-the-fold 图片统一降低尺寸
-       ========================= */
+
 
     var HERO_SMALL = makeImageUrl(401, 720, 405);
     var HERO_LARGE = makeImageUrl(401, 960, 540);
@@ -46,10 +40,6 @@
     var SIDE_SMALL = makeImageUrl(402, 240, 240);
     var SIDE_LARGE = makeImageUrl(402, 360, 360);
 
-    /* =========================
-       Preload（资源预加载）
-       只 preload 首屏真正关键的两张图
-       ========================= */
     var heroPreload = document.createElement("link");
     heroPreload.rel = "preload";
     heroPreload.as = "image";
@@ -967,9 +957,6 @@ badgeBudget.textContent = "Budget: " + levelTimeLimit + "ms";
 badgeRemaining.textContent = "Remaining: ...";
 badgeState.textContent = "State: loading";
 
-/* =========================
-   3) Stats
-========================= */
 var STATS_KEY = "slow_site_game_stats_full_optimized_v1";
 
 function loadStats(){

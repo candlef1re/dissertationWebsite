@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Full optimized</title>
+  <title>毕设实验网站 - 完整优化版（Preload + 图片优化）</title>
 
-  <!-- Connection optimization -->
   <link rel="preconnect" href="https://picsum.photos" crossorigin>
   <link rel="dns-prefetch" href="//picsum.photos">
 
@@ -33,12 +32,7 @@
         "&run=" + encodeURIComponent(__run_pre);
     }
 
-    /* =========================
-       Image optimization
-       1. The main first-screen image uses smaller request sizes
-       2. The side image also uses smaller sizes
-       3. Images lower on the page use reduced sizes as well
-       ========================= */
+
 
     var HERO_SMALL = makeImageUrl(401, 720, 405);
     var HERO_LARGE = makeImageUrl(401, 960, 540);
@@ -46,10 +40,6 @@
     var SIDE_SMALL = makeImageUrl(402, 240, 240);
     var SIDE_LARGE = makeImageUrl(402, 360, 360);
 
-    /* =========================
-       Preload
-       Only preload the two important first-screen images
-       ========================= */
     var heroPreload = document.createElement("link");
     heroPreload.rel = "preload";
     heroPreload.as = "image";
@@ -718,20 +708,19 @@
     }
   </style>
 </head>
-
 <body>
   <div class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1>Website Speed Test</h1>
-        <div class="sub">Optimized version: faster image loading, simplified first screen, and more content loaded as you scroll</div>
+        <h1>Final Project Test</h1>
+        <div class="sub">Fully Optimized Version: Preload + Image Optimization + First-Screen Simplification + Scroll Lazy Loading</div>
       </div>
 
       <div class="badges">
         <div class="badge-like" id="badge-level">Level: -</div>
-        <div class="badge-like" id="badge-budget">Budget: -</div>
-        <div class="badge-like" id="badge-remaining">Remaining: -</div>
-        <div class="badge-like" id="badge-state">State: loading</div>
+        <div class="badge-like" id="badge-budget">Total Time: -</div>
+        <div class="badge-like" id="badge-remaining">Remaining Time: -</div>
+        <div class="badge-like" id="badge-state">Status: Loading</div>
       </div>
 
       <div class="top-progress">
@@ -742,7 +731,7 @@
 
   <main class="page">
     <div class="searchbar">
-      <input id="fake-search-input" placeholder="Enter keywords to search (optimized version)" />
+      <input id="fake-search-input" placeholder="Enter keywords to search (Fully Optimized Version)" />
       <button class="btn-like primary" id="fake-search-btn">Search</button>
     </div>
 
@@ -754,15 +743,15 @@
             class="critical"
             data-idx="1"
             data-role="hero"
-            alt="hero banner"
+            alt="homepage banner"
             width="960"
             height="540"
             decoding="async"
             fetchpriority="high"
           >
           <div class="hero-overlay">
-            <h2>Main Image</h2>
-            <p>This version keeps only the most important content on the first screen and uses faster-loading image sizes.</p>
+            <h2>Homepage Image</h2>
+            <p>This version only keeps essential first-screen content and uses preload and smaller image requests for critical images.</p>
           </div>
         </div>
       </div>
@@ -770,8 +759,8 @@
       <div class="hero-side">
         <div class="card card-pad">
           <div class="card-title">
-            <h3>Quick Summary</h3>
-            <span class="tiny">Important Summary</span>
+            <h3>Key Summary</h3>
+            <span class="tiny">Key Summary</span>
           </div>
 
           <div class="mini-stat">
@@ -781,7 +770,7 @@
                 class="critical"
                 data-idx="2"
                 data-role="side-thumb"
-                alt="key thumb"
+                alt="key thumbnail"
                 width="360"
                 height="360"
                 decoding="async"
@@ -789,35 +778,35 @@
               >
             </div>
             <div>
-              <h4>Key Visual</h4>
-              <p>This side image only requests the size needed for display, helping reduce unnecessary downloads.</p>
+              <h4>Key Image Block</h4>
+              <p>The side image only requests the required display size, reducing unnecessary large image downloads.</p>
             </div>
           </div>
 
           <div style="height:12px"></div>
 
           <div class="hint-box">
-            This page keeps only the necessary first-screen content. Lower sections do not affect the initial start and will load after you scroll down.
+            Only essential content is kept in the first screen. Below-the-fold content is not part of the gate and will load only after scrolling.
           </div>
         </div>
 
         <div class="card card-pad">
           <div class="card-title">
-            <h3>What Is Improved</h3>
-            <span class="tiny">Optimized Experience</span>
+            <h3>Optimization Details</h3>
+            <span class="tiny">Full Optimization</span>
           </div>
           <div class="list-block">
             <div class="list-item">
-              2 important images load earlier
-              <div class="muted">important images are prioritized</div>
+              2 critical images preloaded
+              <div class="muted">preload critical images</div>
             </div>
             <div class="list-item">
-              Images use smaller display-friendly sizes
-              <div class="muted">faster image delivery</div>
+              Image size reduced based on display needs
+              <div class="muted">request smaller image sizes</div>
             </div>
             <div class="list-item">
-              Lower-page content loads after scrolling
-              <div class="muted">content appears as you move down the page</div>
+              Below-the-fold content loads after scrolling
+              <div class="muted">below-the-fold lazy loading</div>
             </div>
           </div>
         </div>
@@ -827,29 +816,29 @@
     <section class="first-screen-grid">
       <section class="card card-pad module loading" id="module-nav">
         <div class="card-title">
-          <h3>Important Navigation</h3>
-          <span class="tiny">Important Section A</span>
+          <h3>Key Navigation</h3>
+          <span class="tiny">Critical Module A</span>
         </div>
-        <div class="module-body">Loading important navigation...</div>
+        <div class="module-body">Loading key navigation...</div>
       </section>
 
       <section class="card card-pad module loading" id="module-news">
         <div class="card-title">
-          <h3>Important Recommendations</h3>
-          <span class="tiny">Important Section B</span>
+          <h3>Key Recommendations</h3>
+          <span class="tiny">Critical Module B</span>
         </div>
-        <div class="module-body">Loading important recommendations...</div>
+        <div class="module-body">Loading key recommendations...</div>
       </section>
     </section>
 
     <div class="statusbar">
       <div class="status-left">
-        <div class="status-line" id="status-line">Waiting for important first-screen content to finish loading...</div>
+        <div class="status-line" id="status-line">Waiting for first-screen critical resources and modules to load...</div>
         <div class="progress">
           <div id="progress-bar"></div>
         </div>
         <div class="status-line">
-          This version combines earlier image loading, smaller image sizes, and a simpler first screen.
+          This version applies preload, image resizing, and first-screen simplification.
         </div>
       </div>
 
@@ -906,14 +895,14 @@
     </section>
 
     <div class="footer-area">
-      This is the optimized version: important first-screen images are prepared earlier, image requests use display-appropriate sizes, and lower-page content loads after scrolling to help the page become usable as quickly as possible.
+      This version is the "Fully Optimized Version": critical first-screen images are preloaded, image sizes are reduced based on display needs, and below-the-fold content loads after scrolling to minimize first-screen gate time.
     </div>
   </main>
 
   <div class="game-overlay" id="game-overlay">
     <div class="panel">
       <div class="panel-head">
-        <div><div class="h" id="panel-title">Waiting for loading to finish...</div></div>
+        <div><div class="h" id="panel-title">Waiting for loading to complete…</div></div>
         <div class="mini" id="panel-mini">-</div>
       </div>
 
@@ -926,7 +915,7 @@
             <input id="guess-input" placeholder="Enter the 3-digit number you just saw" />
             <button class="primary" id="submit-btn">Submit</button>
             <button id="close-btn" style="display:none;">Close</button>
-            <button id="restart-btn" style="display:none;">Restart (Level 1)</button>
+            <button id="restart-btn" style="display:none;">Return to Homepage (after screenshot)</button>
             <button id="next-btn" style="display:none;">Next Level</button>
           </div>
 
@@ -935,16 +924,13 @@
 
         <div class="block">
           <div class="block-title">Full Feedback</div>
-          <div class="feedback" id="feedback">(Complete information will appear here after the round ends)</div>
+          <div class="feedback" id="feedback">(Full information will be displayed here after the game ends)</div>
         </div>
       </div>
     </div>
   </div>
 
 <script>
-/* =========================
-   1) Parameters
-========================= */
 var level = getIntParam("level", 1);
 if (level < 1) level = 1;
 var run = getStrParam("run", String(Date.now()));
@@ -954,15 +940,12 @@ function expBudget(level, startMs, ratio, minMs){
   return Math.max(minMs, Math.round(raw));
 }
 
-var levelTimeLimit = expBudget(level, 7000, 0.8, 500);
+var levelTimeLimit = expBudget(level, 11000, 0.8, 500);
 var idealDisplayTime = expBudget(level, 1000, 0.90, 150);
 
 var navEntry = performance.getEntriesByType("navigation")[0];
 var navStartTime = navEntry ? navEntry.startTime : 0;
 
-/* =========================
-   2) Badges
-========================= */
 var badgeLevel = document.getElementById("badge-level");
 var badgeBudget = document.getElementById("badge-budget");
 var badgeRemaining = document.getElementById("badge-remaining");
@@ -973,9 +956,6 @@ badgeBudget.textContent = "Budget: " + levelTimeLimit + "ms";
 badgeRemaining.textContent = "Remaining: ...";
 badgeState.textContent = "State: loading";
 
-/* =========================
-   3) Stats
-========================= */
 var STATS_KEY = "slow_site_game_stats_full_optimized_v1";
 
 function loadStats(){
@@ -1008,9 +988,6 @@ function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull){
   return s;
 }
 
-/* =========================
-   4) Device / Network
-========================= */
 var deviceInfo = {
   hardwareConcurrency: navigator.hardwareConcurrency || "N/A",
   deviceMemory: navigator.deviceMemory || "N/A",
@@ -1030,9 +1007,6 @@ var throttleProfile = {
   simulatedDownKbps: 1600
 };
 
-/* =========================
-   5) Gate resources
-========================= */
 var criticalNodes = document.querySelectorAll("img.critical");
 var criticalTarget = criticalNodes.length;
 var moduleTarget = 2;
@@ -1068,17 +1042,16 @@ function gateTotal(){
 function currentGateScore(){
   return criticalLoadedCount + moduleLoadedCount;
 }
-
 function updateProgress(){
   var pct = Math.round((currentGateScore() / gateTotal()) * 100);
   progressBar.style.width = pct + "%";
   if (topProgressBar) topProgressBar.style.width = pct + "%";
 
   statusLine.textContent =
-    "Waiting for important first-screen content to finish loading...\n" +
-    "Important images: " + criticalLoadedCount + "/" + criticalTarget +
-    " | Important sections: " + moduleLoadedCount + "/" + moduleTarget +
-    " | Total progress: " + pct + "%";
+    "Waiting for first-screen critical resources and modules to finish loading...\n" +
+    "Critical Images: " + criticalLoadedCount + "/" + criticalTarget +
+    " | Critical Modules: " + moduleLoadedCount + "/" + moduleTarget +
+    " | Total Progress: " + pct + "%";
 }
 
 function markCriticalWrap(idx, ok){
@@ -1156,7 +1129,7 @@ fakeModuleLoad(
   "module-nav",
   baseModuleDelay,
   '<div class="list-block">' +
-    '<div class="list-item">Home<div class="muted">Priority navigation shown first</div></div>' +
+    '<div class="list-item">Home<div class="muted">Priority critical navigation</div></div>' +
     '<div class="list-item">Recommendations<div class="muted">Essential first-screen entry</div></div>' +
     '<div class="list-item">Categories<div class="muted">Quick start area</div></div>' +
   '</div>'
@@ -1166,9 +1139,9 @@ fakeModuleLoad(
   "module-news",
   baseModuleDelay + 130,
   '<div class="list-block">' +
-    '<div class="list-item"><strong>Recommended Content A</strong><div class="muted">Important content is visible first</div></div>' +
-    '<div class="list-item"><strong>Recommended Content B</strong><div class="muted">Images and connections are optimized</div></div>' +
-    '<div class="list-item"><strong>Recommended Content C</strong><div class="muted">Other sections appear later</div></div>' +
+    '<div class="list-item"><strong>Recommended Content A</strong><div class="muted">Critical recommendations are visible first</div></div>' +
+    '<div class="list-item"><strong>Recommended Content B</strong><div class="muted">Both images and connections have been optimized</div></div>' +
+    '<div class="list-item"><strong>Recommended Content C</strong><div class="muted">The remaining areas are lazy loaded</div></div>' +
   '</div>'
 );
 
@@ -1217,7 +1190,6 @@ function tryTriggerGate(){
   if (criticalLoadedCount >= criticalTarget && moduleLoadedCount >= moduleTarget){
     gateTriggered = true;
     forceStartBtn.disabled = false;
-    freezeLoadCountdown();
     badgeState.textContent = "State: ready";
     onGateReady();
   }
@@ -1241,7 +1213,8 @@ var metrics = {
   moduleLoadedCount: 0,
   imgMetrics: imgMetrics,
   moduleMetrics: moduleMetrics,
-  lazySectionMetrics: lazySectionMetrics
+  lazySectionMetrics: lazySectionMetrics,
+  leftoverAtStartGame: null,
 };
 
 /* =========================
@@ -1261,6 +1234,23 @@ var nextBtn = document.getElementById("next-btn");
 var feedbackEl = document.getElementById("feedback");
 
 var currentCode = "";
+
+var numberHideWatcher = null;
+
+function hideNumberAndEnableInput(){
+  if (gameEnded) return;
+
+  gameNumber.style.display = "none";
+  guessInput.value = "";
+  guessInput.focus();
+
+  metrics.numberHiddenAt = performance.now() - navStartTime;
+  badgeRemaining.textContent = "Remaining(load): 0ms";
+  timeUp = true;
+  timeUpAt = performance.now() - navStartTime;
+
+  gameStatus.textContent = "Please enter the 3-digit number you just saw:";
+}
 
 function generateCode(){
   currentCode = Math.floor(100 + Math.random() * 900).toString();
@@ -1302,22 +1292,24 @@ function startGame(){
 
   var now = performance.now();
   var used = now - navStartTime;
-  var leftover = levelTimeLimit - used;
+  var leftover = Math.max(0, levelTimeLimit - used);
 
-  panelTitle.textContent = "Level " + level + ": important first-screen content is ready";
+  panelTitle.textContent = "Level " + level + ": First-screen critical path completed";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
-    "Used until ready: " + Math.round(used) + "ms\n" +
-    "Important Images: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
-    "Important Sections: " + moduleLoadedCount + "/" + moduleTarget;
+    "Used until gate: " + Math.round(used) + "ms\n" +
+    "Remaining(now): " + Math.round(leftover) + "ms\n" +
+    "Critical: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
+    "Critical Modules: " + moduleLoadedCount + "/" + moduleTarget;
 
   if (leftover <= 0){
     endByNoTime();
     return;
   }
 
-  var actualDisplay = Math.min(idealDisplayTime, leftover);
-  metrics.actualDisplayTime = actualDisplay;
+  // Number display time is synchronized with levelTimeLimit
+  metrics.actualDisplayTime = leftover;
+  metrics.leftoverAtStartGame = leftover;
 
   generateCode();
   gameNumber.style.display = "block";
@@ -1325,17 +1317,27 @@ function startGame(){
   metrics.numberShownAt = performance.now() - navStartTime;
 
   gameStatus.textContent =
-    "The number will disappear soon. Please remember the 3-digit code.\n" +
-    "This version uses earlier image loading, optimized image sizes, and scroll-based loading for lower-page content.";
+    "The number will remain visible until the countdown for this level actually ends.\n" +
+    "This version applies preload, image optimization, and below-the-fold scroll lazy loading.";
 
-  setTimeout(function(){
+  if (numberHideWatcher){
+    cancelAnimationFrame(numberHideWatcher);
+    numberHideWatcher = null;
+  }
+
+  function watchNumber(){
     if (gameEnded) return;
-    gameNumber.style.display = "none";
-    guessInput.value = "";
-    guessInput.focus();
-    metrics.numberHiddenAt = performance.now() - navStartTime;
-    gameStatus.textContent = "Please enter the 3-digit number you just saw:";
-  }, actualDisplay);
+
+    var remaining = getLoadRemainingMs();
+    if (remaining <= 0){
+      hideNumberAndEnableInput();
+      return;
+    }
+
+    numberHideWatcher = requestAnimationFrame(watchNumber);
+  }
+
+  numberHideWatcher = requestAnimationFrame(watchNumber);
 }
 
 function formatReport(){
@@ -1346,6 +1348,7 @@ function formatReport(){
     : "N/A";
 
   var lines = [];
+  lines.push("Full optimized version")
   lines.push("===== Experiment Metrics =====");
   lines.push("");
   lines.push("Version: full_optimized_preload_imageopt");
@@ -1357,13 +1360,6 @@ function formatReport(){
   lines.push("CriticalLoadedAtGate: " + metrics.criticalLoadedCount + "/" + criticalTarget);
   lines.push("CriticalModulesAtGate: " + metrics.moduleLoadedCount + "/" + moduleTarget);
   lines.push("");
-  lines.push("----- Experiment Profile -----");
-  lines.push("ThrottleEnabled: " + throttleProfile.enabled);
-  lines.push("ThrottleProfileName: " + throttleProfile.profileName);
-  lines.push("SimulatedRTT(ms): " + throttleProfile.simulatedRttMs);
-  lines.push("SimulatedJitter(ms): " + throttleProfile.simulatedJitterMs);
-  lines.push("SimulatedDownlink(Kbps): " + throttleProfile.simulatedDownKbps);
-  lines.push("");
   lines.push("----- Device Performance -----");
   lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);
   lines.push("DeviceMemory(GB): " + deviceInfo.deviceMemory);
@@ -1373,30 +1369,11 @@ function formatReport(){
   lines.push("RTT(ms): " + networkRTT);
   lines.push("Downlink(Mb/s): " + networkDownlink);
   lines.push("EffectiveType: " + effectiveType);
-  lines.push("");
-  lines.push("----- Critical Image Metrics -----");
-  for (var i = 0; i < metrics.imgMetrics.length; i++){
-    var m = metrics.imgMetrics[i];
-    lines.push("IMG" + m.idx + ": " + m.status + " @ " + (m.endMs != null ? Math.round(m.endMs) + "ms" : "N/A"));
-  }
-  lines.push("");
-  lines.push("----- Critical Module Metrics -----");
-  for (var j = 0; j < moduleMetrics.length; j++){
-    lines.push(moduleMetrics[j].id + ": " + moduleMetrics[j].loadedAt + "ms");
-  }
-  lines.push("");
-  lines.push("----- Lazy Below-the-fold Metrics -----");
-  if (lazySectionMetrics.length === 0){
-    lines.push("No lazy sections triggered before end of round.");
-  } else {
-    for (var k = 0; k < lazySectionMetrics.length; k++){
-      lines.push(
-        lazySectionMetrics[k].id +
-        ": observed@" + lazySectionMetrics[k].observedAt + "ms" +
-        ", loaded@" + lazySectionMetrics[k].loadedAt + "ms"
-      );
-    }
-  }
+  lines.push("LeftoverTimeAtGameStart(ms): " + (
+    metrics.leftoverAtStartGame != null
+      ? Math.round(metrics.leftoverAtStartGame)
+      : "N/A"
+  ));
   return lines.join("\n");
 }
 
@@ -1430,17 +1407,17 @@ function showDeferredLoadNoTimeAfterGate(){
   deferredNoTimeShown = true;
 
   showOverlayBase();
-  panelTitle.textContent = "Ended: loading timeout";
+  panelTitle.textContent = "Ended: Timeout during loading stage";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
-    "Page became ready at: " + Math.round(metrics.gateReadyAt) + "ms\n" +
-    "Time limit first reached at: " + (timeUpAt != null ? Math.round(timeUpAt) + "ms" : "N/A");
+    "Gate finished at: " + Math.round(metrics.gateReadyAt) + "ms\n" +
+    "Time up first observed at: " + (timeUpAt != null ? Math.round(timeUpAt) + "ms" : "N/A");
 
   gameNumber.textContent = "— — —";
   gameNumber.style.display = "block";
 
   gameStatus.textContent =
-    "When the important first-screen content finished loading, the loading time had already exceeded the time budget.";
+    "When the first-screen critical gate was completed, the loading time had already exceeded the budget, so this is judged as a timeout during the loading stage.";
 
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
@@ -1453,11 +1430,11 @@ function showDeferredLoadNoTimeAfterGate(){
 
 function endByNoTime(){
   showOverlayBase();
-  panelTitle.textContent = "Ended: not enough time";
+  panelTitle.textContent = "Ended: Not enough time";
   panelMini.textContent = "Budget(Time Budget): " + levelTimeLimit + "ms";
   gameNumber.textContent = "— — —";
   gameNumber.style.display = "block";
-  gameStatus.textContent = "There is not enough time left in this round to show the number.";
+  gameStatus.textContent = "There is not enough remaining time in this level to display the number.";
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
   nextBtn.style.display = "none";
@@ -1475,12 +1452,12 @@ submitBtn.addEventListener("click", function(){
   metrics.userSubmitAt = performance.now() - navStartTime;
 
   if (guess === currentCode){
-    panelTitle.textContent = "Passed: correct answer";
-    gameStatus.textContent = "You entered the correct answer. You can continue to the next level.";
+    panelTitle.textContent = "Passed: Correct answer";
+    gameStatus.textContent = "You answered correctly. You may proceed to the next level.";
     finishRound("correct");
   } else {
-    panelTitle.textContent = "Ended: incorrect answer";
-    gameStatus.textContent = "Your answer was incorrect. This experiment has ended.";
+    panelTitle.textContent = "Ended: Wrong answer";
+    gameStatus.textContent = "You answered incorrectly. This experiment is over.";
     finishRound("wrong");
   }
 });
@@ -1495,10 +1472,7 @@ closeBtn.addEventListener("click", function(){
 
 restartBtn.addEventListener("click", function(){
   try{ localStorage.removeItem(STATS_KEY); }catch(e){}
-  var url = new URL(window.location.href);
-  url.searchParams.set("level", 1);
-  url.searchParams.set("run", String(Date.now()));
-  window.location.href = url.toString();
+  window.location.href = "index.html";
 });
 
 nextBtn.addEventListener("click", function(){
@@ -1532,7 +1506,6 @@ forceStartBtn.addEventListener("click", function(){
   }
 
   updateProgress();
-  freezeLoadCountdown();
   badgeState.textContent = "State: forced";
   metrics.gateReadyAt = performance.now() - navStartTime;
   metrics.loadDurationAtGate = metrics.gateReadyAt;
@@ -1552,13 +1525,13 @@ document.getElementById("fake-search-btn").addEventListener("click", function(){
     btn.textContent = old;
     if (!gameEnded && !gateTriggered) badgeState.textContent = "State: loading";
     else if (!gameEnded && gateTriggered) badgeState.textContent = "State: ready_to_play";
-    alert("Search results have been updated (optimized version)");
+    alert("Search results have been updated (Fully Optimized Version)");
   }, 700 + (level - 1) * 60);
 });
 
 /* =========================
    10) Below-the-fold lazy load
-   Images also use smaller requested sizes
+   images also use smaller-size requests
 ========================= */
 function makeFeedCard(seed, title, desc){
   var srcSmall = makeImageUrl(seed, 360, 210);
@@ -1604,11 +1577,11 @@ function renderLazySection(section, kind){
     if (kind === "quick"){
       html =
         '<div class="card-pad">' +
-          '<div class="card-title"><h3>Quick Access</h3><span class="tiny">Additional Content</span></div>' +
+          '<div class="card-title"><h3>Quick Access</h3><span class="tiny">Uncritical</span></div>' +
           '<div class="list-block">' +
-            '<div class="list-item">Quick Access A<div class="muted">Loads after scrolling down</div></div>' +
-            '<div class="list-item">Quick Access B<div class="muted">Does not affect the initial page start</div></div>' +
-            '<div class="list-item">Quick Access C<div class="muted">Additional lower-page content</div></div>' +
+            '<div class="list-item">Quick Access A<div class="muted">Only starts loading after scrolling</div></div>' +
+            '<div class="list-item">Quick Access B<div class="muted">Not part of the first-screen gate</div></div>' +
+            '<div class="list-item">Quick Access C<div class="muted">Below-the-fold content</div></div>' +
           '</div>' +
         '</div>';
     }
@@ -1616,14 +1589,14 @@ function renderLazySection(section, kind){
     if (kind === "gallery"){
       html =
         '<div class="card-pad">' +
-          '<div class="card-title"><h3>Image Cards</h3><span class="tiny">Loads on Scroll</span></div>' +
+          '<div class="card-title"><h3>Image-Text Cards</h3><span class="tiny">Scroll-triggered</span></div>' +
           '<div class="feed-grid">' +
-            makeFeedCard(411, "Image Card A", "Loads after you scroll to this section") +
-            makeFeedCard(412, "Image Card B", "Moved out of the important first-screen area") +
-            makeFeedCard(413, "Image Card C", "No longer slows down the page start") +
-            makeFeedCard(414, "Image Card D", "Additional content") +
-            makeFeedCard(415, "Image Card E", "Loads later on the page") +
-            makeFeedCard(416, "Image Card F", "Appears when it enters the screen") +
+            makeFeedCard(411, "Image-Text Card A", "Loads only after the user scrolls to this area") +
+            makeFeedCard(412, "Image-Text Card B", "Removed from the critical path") +
+            makeFeedCard(413, "Image-Text Card C", "The first screen is no longer slowed down by this area") +
+            makeFeedCard(414, "Image-Text Card D", "uncritical content") +
+            makeFeedCard(415, "Image-Text Card E", "lazy loaded below the fold") +
+            makeFeedCard(416, "Image-Text Card F", "Triggered only after entering the viewport") +
           '</div>' +
         '</div>';
     }
@@ -1631,11 +1604,11 @@ function renderLazySection(section, kind){
     if (kind === "docs"){
       html =
         '<div class="card-pad">' +
-          '<div class="card-title"><h3>Downloads and Files</h3><span class="tiny">Loaded Later</span></div>' +
+          '<div class="card-title"><h3>Downloads and Attachments</h3><span class="tiny">Deferred</span></div>' +
           '<div class="list-block">' +
-            '<div class="list-item"><strong>Attachment_Notes.pdf</strong><div class="muted">Starts loading after scrolling down</div></div>' +
-            '<div class="list-item"><strong>Resource_List.xlsx</strong><div class="muted">Separate from the first-screen start</div></div>' +
-            '<div class="list-item"><strong>Archive_History.zip</strong><div class="muted">Does not affect the initial page start</div></div>' +
+            '<div class="list-item"><strong>Attachment Notes.pdf</strong><div class="muted">Only requested after scrolling down</div></div>' +
+            '<div class="list-item"><strong>Resource List.xlsx</strong><div class="muted">Decoupled from the first screen</div></div>' +
+            '<div class="list-item"><strong>Historical Archive.zip</strong><div class="muted">Not part of the first-screen gate</div></div>' +
           '</div>' +
         '</div>';
     }
@@ -1643,11 +1616,11 @@ function renderLazySection(section, kind){
     if (kind === "sidefeed"){
       html =
         '<div class="card-pad">' +
-          '<div class="card-title"><h3>Popular Topics and Recommendations</h3><span class="tiny">Loaded Later</span></div>' +
+          '<div class="card-title"><h3>Trending and Recommendations</h3><span class="tiny">Deferred</span></div>' +
           '<div class="list-block">' +
-            '<div class="list-item">Popular Topic 1<div class="muted">Loads as you scroll</div></div>' +
-            '<div class="list-item">Popular Topic 2<div class="muted">Not part of the important first-screen content</div></div>' +
-            '<div class="list-item">Popular Topic 3<div class="muted">Shown later in this experiment</div></div>' +
+            '<div class="list-item">Trending Recommendation 1<div class="muted">scroll lazy loaded</div></div>' +
+            '<div class="list-item">Trending Recommendation 2<div class="muted">Non-critical first-screen content</div></div>' +
+            '<div class="list-item">Trending Recommendation 3<div class="muted">Used as an uncritical area in the experiment</div></div>' +
           '</div>' +
         '</div>';
     }

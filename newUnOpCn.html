@@ -1,34 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dissertation Experiment Website - First-Screen Optimized Version (No Preload)</title>
+  <title>毕设实验网站</title>
 
-  <!-- Keep connection optimization only, no preload -->
-  <link rel="preconnect" href="https://picsum.photos" crossorigin>
-  <link rel="dns-prefetch" href="//picsum.photos">
-
-  <script>
-    function getIntParam(name, fallback){
-      var params = new URLSearchParams(window.location.search);
-      var v = parseInt(params.get(name), 10);
-      return isNaN(v) ? fallback : v;
-    }
-    function getStrParam(name, fallback){
-      var params = new URLSearchParams(window.location.search);
-      var v = params.get(name);
-      return (v == null || v === "") ? fallback : v;
-    }
-
-    var __level_pre = getIntParam("level", 1);
-    if (__level_pre < 1) __level_pre = 1;
-    var __run_pre = getStrParam("run", String(Date.now()));
-
-    function makeImageUrl(seed, w, h){
-      return "https://picsum.photos/" + w + "/" + h + "?random=" + seed + "&lv=" + encodeURIComponent(__level_pre) + "&run=" + encodeURIComponent(__run_pre);
-    }
-  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -51,7 +29,7 @@
       padding:0;
       background:linear-gradient(180deg,#09101d 0%, #0b1222 100%);
       color:var(--fg);
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+      font-family:"Roboto",system-ui,-apple-system,"Segoe UI",sans-serif;
     }
     body{min-height:100vh; overflow:auto;}
 
@@ -64,7 +42,7 @@
       border-bottom:1px solid var(--line);
     }
     .topbar-inner{
-      max-width:1280px;
+      max-width:1400px;
       margin:0 auto;
       padding:14px 18px 10px;
       display:flex;
@@ -89,7 +67,6 @@
       font-size:12px;
       color:var(--muted);
     }
-
     .badges{
       display:flex;
       gap:8px;
@@ -105,7 +82,6 @@
       color:var(--muted);
       white-space:nowrap;
     }
-
     .top-progress{
       position:absolute;
       left:0;
@@ -123,14 +99,14 @@
     }
 
     .page{
-      max-width:1280px;
+      max-width:1400px;
       margin:0 auto;
       padding:18px;
     }
 
     .searchbar{
       display:grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr auto auto;
       gap:10px;
       margin-bottom:16px;
     }
@@ -162,6 +138,7 @@
       border-color:rgba(245,190,79,0.35);
       color:#ffe29a;
     }
+    .btn-like:disabled{opacity:.55; cursor:not-allowed;}
 
     .hero{
       display:grid;
@@ -169,9 +146,8 @@
       gap:14px;
       margin-bottom:16px;
     }
-
     .card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.035));
+      background:linear-gradient(180deg, rgba(206, 17, 17, 0.05), rgba(225, 240, 16, 0.035));
       border:1px solid var(--line);
       border-radius:20px;
       box-shadow:var(--shadow);
@@ -190,11 +166,43 @@
       margin:0;
       font-size:15px;
       font-weight:700;
-      color:#eef4ff;
+      color:#eef4ff
     }
     .tiny{
       font-size:12px;
       color:var(--muted);
+    }
+
+    .hero-media{
+      position:relative;
+      min-height:280px;
+      background:rgba(255,255,255,0.04);
+    }
+    .hero-media img{
+      width:100%;
+      height:100%;
+      min-height:280px;
+      object-fit:cover;
+      display:block;
+      filter:saturate(1.03) contrast(1.04);
+    }
+    .hero-overlay{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      padding:16px;
+      background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
+    }
+    .hero-overlay h2{
+      margin:0 0 8px;
+      font-size:22px;
+      font-weight:700;
+      color:#ff6a78
+    }
+    .hero-overlay p{
+      margin:0;
+      font-size:13px;
+      color:rgba(255,255,255,.86);
+      max-width:85%;
     }
 
     .critical-wrap,
@@ -203,38 +211,6 @@
       overflow:hidden;
       background:rgba(255,255,255,0.05);
     }
-
-    .hero-media{
-      position:relative;
-      min-height:300px;
-      background:rgba(255,255,255,0.04);
-    }
-    .hero-media img{
-      width:100%;
-      height:100%;
-      min-height:300px;
-      object-fit:cover;
-      display:block;
-    }
-    .hero-overlay{
-      position:absolute;
-      left:0; right:0; bottom:0;
-      padding:16px;
-      background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.58) 100%);
-    }
-    .hero-overlay h2{
-      margin:0 0 8px;
-      font-size:22px;
-      font-weight:700;
-      color:#ff6a78;
-    }
-    .hero-overlay p{
-      margin:0;
-      font-size:13px;
-      color:rgba(255,255,255,.88);
-      max-width:85%;
-    }
-
     .critical-wrap img,
     .thumb img{
       width:100%;
@@ -242,7 +218,6 @@
       object-fit:cover;
       display:block;
     }
-
     .spinner{
       position:absolute;
       right:10px;
@@ -269,7 +244,6 @@
       border:1px solid rgba(255,106,120,.35);
       z-index:2;
     }
-
     @keyframes pulse{
       0%{transform:scale(1);opacity:.68}
       50%{transform:scale(1.55);opacity:1}
@@ -278,25 +252,24 @@
 
     .hero-side{
       display:grid;
-      grid-template-rows: auto auto;
+      grid-template-rows: 1fr 1fr;
       gap:14px;
     }
-
     .mini-stat{
       display:grid;
-      grid-template-columns: 90px 1fr;
+      grid-template-columns: 84px 1fr;
       gap:12px;
       align-items:center;
     }
     .mini-stat .thumb{
-      height:90px;
+      height:84px;
       border-radius:16px;
       border:1px solid var(--line);
     }
     .mini-stat h4{
       margin:0 0 6px;
       font-size:14px;
-      color:#eef4ff;
+      color:#eef4ff
     }
     .mini-stat p{
       margin:0;
@@ -305,16 +278,41 @@
       line-height:1.5;
     }
 
-    .first-screen-grid{
+    .layout{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 270px 1fr 320px;
       gap:16px;
-      margin-bottom:18px;
+      align-items:start;
+    }
+
+    .side-list,
+    .news-list,
+    .doc-list,
+    .grid-cards{
+      display:grid;
+      gap:10px;
+    }
+
+    .list-item{
+      padding:12px 13px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.04);
+      font-size:13px;
+      color:var(--fg);
+    }
+
+    .list-item .muted,
+    .doc-meta,
+    .news-meta{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
     }
 
     .module.loading .module-body{
       color:var(--muted);
-      min-height:100px;
+      min-height:90px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -326,22 +324,42 @@
       padding:14px;
     }
 
-    .list-block{
+    .content-feed{
       display:grid;
-      gap:10px;
+      gap:16px;
     }
-    .list-item{
-      padding:12px 13px;
-      border-radius:14px;
+    .content-feed h3{
+      color:#eef4ff
+    }
+
+    .feed-grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    .feed-card{
+      overflow:hidden;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,0.08);
       background:rgba(255,255,255,0.04);
-      font-size:13px;
-      color:var(--fg);
     }
-    .muted{
-      color:var(--muted);
+    .feed-card .thumb{
+      height:140px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .feed-card .body{
+      padding:12px;
+    }
+    .feed-card h4{
+      margin:0 0 6px;
+      font-size:14px;
+      line-height:1.4;
+    }
+    .feed-card p{
+      margin:0;
       font-size:12px;
-      margin-top:4px;
+      color:var(--muted);
+      line-height:1.55;
     }
 
     .statusbar{
@@ -387,104 +405,6 @@
       flex-direction:column;
       gap:8px;
       align-items:flex-end;
-    }
-
-    .hint-box{
-      margin-top:14px;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(65,211,155,.22);
-      background:rgba(65,211,155,.08);
-      color:#dbfff1;
-      font-size:12px;
-      line-height:1.65;
-    }
-
-    .below-fold{
-      margin-top:28px;
-      display:grid;
-      gap:18px;
-    }
-
-    .lazy-section{
-      min-height:220px;
-    }
-
-    .placeholder-shell{
-      padding:16px;
-    }
-    .placeholder-title{
-      height:16px;
-      width:180px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.08);
-      margin-bottom:14px;
-    }
-    .skeleton-grid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:12px;
-    }
-    .skeleton-card{
-      height:140px;
-      border-radius:16px;
-      background:linear-gradient(90deg,
-        rgba(255,255,255,0.05) 0%,
-        rgba(255,255,255,0.10) 50%,
-        rgba(255,255,255,0.05) 100%);
-      background-size:200% 100%;
-      animation: shimmer 1.8s infinite linear;
-      border:1px solid rgba(255,255,255,0.06);
-    }
-    .skeleton-list{
-      display:grid;
-      gap:10px;
-    }
-    .skeleton-row{
-      height:52px;
-      border-radius:14px;
-      background:linear-gradient(90deg,
-        rgba(255,255,255,0.05) 0%,
-        rgba(255,255,255,0.10) 50%,
-        rgba(255,255,255,0.05) 100%);
-      background-size:200% 100%;
-      animation: shimmer 1.8s infinite linear;
-      border:1px solid rgba(255,255,255,0.06);
-    }
-
-    @keyframes shimmer{
-      0%{background-position:200% 0;}
-      100%{background-position:-200% 0;}
-    }
-
-    .feed-grid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:12px;
-    }
-    .feed-card{
-      overflow:hidden;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,0.08);
-      background:rgba(255,255,255,0.04);
-    }
-    .feed-card .thumb{
-      height:140px;
-      border-bottom:1px solid rgba(255,255,255,0.08);
-    }
-    .feed-card .body{
-      padding:12px;
-    }
-    .feed-card h4{
-      margin:0 0 6px;
-      font-size:14px;
-      line-height:1.4;
-    }
-    .feed-card p{
-      margin:0;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.55;
     }
 
     .footer-area{
@@ -601,17 +521,15 @@
       min-height:320px;
     }
 
-    @media (max-width: 1080px){
+    @media (max-width: 1180px){
+      .layout{grid-template-columns: 1fr;}
       .hero{grid-template-columns:1fr;}
-      .first-screen-grid{grid-template-columns:1fr;}
-      .feed-grid{grid-template-columns:repeat(2,1fr);}
-      .skeleton-grid{grid-template-columns:repeat(2,1fr);}
+      .feed-grid{grid-template-columns: repeat(2, 1fr);}
     }
     @media (max-width: 760px){
       .searchbar{grid-template-columns:1fr;}
       .panel-body{grid-template-columns:1fr;}
       .feed-grid{grid-template-columns:1fr;}
-      .skeleton-grid{grid-template-columns:1fr;}
       .statusbar{flex-direction:column;}
       .controls{align-items:stretch;}
       .badges{justify-content:flex-start;}
@@ -623,8 +541,8 @@
   <div class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <h1>Dissertation Test</h1>
-        <div class="sub">First-screen optimized version: below-the-fold content loads only after scrolling (no preload)</div>
+        <h1>毕设测试</h1>
+        <div class="sub">欢迎，这是一个测试网站</div>
       </div>
 
       <div class="badges">
@@ -634,7 +552,7 @@
         <div class="badge-like" id="badge-state">State: loading</div>
       </div>
 
-      <div class="top-progress">
+      <div class="top-progress" aria-label="top load progress">
         <div class="top-progress-bar" id="top-progress-bar"></div>
       </div>
     </div>
@@ -642,18 +560,19 @@
 
   <main class="page">
     <div class="searchbar">
-      <input id="fake-search-input" placeholder="Enter keywords to search (first-screen optimized / scroll-lazy version)" />
-      <button class="btn-like primary" id="fake-search-btn">Search</button>
+      <input id="fake-search-input" placeholder="输入关键词进行检索（模拟慢响应）" />
+      <button class="btn-like primary" id="fake-search-btn">搜索</button>
+      <button class="btn-like warn" id="fake-filter-btn">筛选</button>
     </div>
 
     <section class="hero">
       <div class="card critical-wrap" id="critical-wrap-1">
         <span class="spinner"></span>
         <div class="hero-media">
-          <img class="critical" data-idx="1" data-role="hero" alt="hero banner" width="1280" height="720" decoding="async" fetchpriority="high">
+          <img class="critical" data-idx="1" data-role="hero" alt="hero banner">
           <div class="hero-overlay">
-            <h2>Homepage Image</h2>
-            <p>This version keeps only the essential first-screen content, while below-the-fold content starts loading only after the user scrolls.</p>
+            <h2>首页图片</h2>
+            <p>此网站仅用于毕业设计</p>
           </div>
         </div>
       </div>
@@ -661,190 +580,216 @@
       <div class="hero-side">
         <div class="card card-pad">
           <div class="card-title">
-            <h3>Key Summary</h3>
-            <span class="tiny">Critical Summary</span>
+            <h3>这是一个区域</h3>
+            <span class="tiny">Overview</span>
           </div>
 
           <div class="mini-stat">
             <div class="thumb critical-wrap" id="critical-wrap-2">
               <span class="spinner"></span>
-              <img class="critical" data-idx="2" data-role="side-thumb" alt="key thumb" width="480" height="480" decoding="async" fetchpriority="high">
+              <img class="critical" data-idx="2" data-role="thumb" alt="thumb 1">
             </div>
             <div>
-              <h4>Key Image Block</h4>
-              <p>The first screen keeps only one supporting key image, while all other images are moved down as non-critical content.</p>
+              <h4>这是一个图片</h4>
+              <p>用来模拟真实网站</p>
             </div>
           </div>
 
-          <div style="height:12px"></div>
+          <div style="height:10px"></div>
 
-          <div class="hint-box">
-            The below-the-fold content on this page has been changed to uncritical: if the user does not scroll, these modules will not actually load.
+          <div class="mini-stat">
+            <div class="thumb critical-wrap" id="critical-wrap-3">
+              <span class="spinner"></span>
+              <img class="critical" data-idx="3" data-role="thumb" alt="thumb 2">
+            </div>
+            <div>
+              <h4>这是另一个图片</h4>
+              <p>你就慢慢加载吧</p>
+            </div>
           </div>
         </div>
 
         <div class="card card-pad">
           <div class="card-title">
-            <h3>First-Screen Optimization Notes</h3>
-            <span class="tiny">First-screen Only</span>
+            <h3>首屏卡片</h3>
+            <span class="tiny">Critical</span>
           </div>
-          <div class="list-block">
-            <div class="list-item">
-              Only 2 critical images are included in the gate
-              <div class="muted">critical images only</div>
+
+          <div class="mini-stat">
+            <div class="thumb critical-wrap" id="critical-wrap-4">
+              <span class="spinner"></span>
+              <img class="critical" data-idx="4" data-role="thumb" alt="thumb 3">
             </div>
-            <div class="list-item">
-              Only 2 critical modules are included in the gate
-              <div class="muted">critical modules only</div>
+            <div>
+              <h4>图片 1</h4>
+              <p>这是必须加载的关键图片</p>
             </div>
-            <div class="list-item">
-              Lower content is triggered by scrolling
-              <div class="muted">scroll-triggered lazy section loading</div>
+          </div>
+
+          <div style="height:10px"></div>
+
+          <div class="mini-stat">
+            <div class="thumb critical-wrap" id="critical-wrap-5">
+              <span class="spinner"></span>
+              <img class="critical" data-idx="5" data-role="thumb" alt="thumb 4">
+            </div>
+            <div>
+              <h4>图片 2</h4>
+              <p>第二个</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="first-screen-grid">
-      <section class="card card-pad module loading" id="module-nav">
-        <div class="card-title">
-          <h3>Critical Navigation</h3>
-          <span class="tiny">Critical Module A</span>
-        </div>
-        <div class="module-body">Loading critical navigation...</div>
+    <section class="layout">
+      <aside class="content-feed">
+        <section class="card card-pad module loading" id="module-nav">
+          <div class="card-title">
+            <h3>分类导航</h3>
+            <span class="tiny">Module A</span>
+          </div>
+          <div class="module-body">正在加载分类导航...</div>
+        </section>
+
+        <section class="card card-pad module loading" id="module-quick">
+          <div class="card-title">
+            <h3>快捷入口</h3>
+            <span class="tiny">Module B</span>
+          </div>
+          <div class="module-body">正在加载快捷入口...</div>
+        </section>
+      </aside>
+
+      <section class="content-feed">
+        <section class="card card-pad module loading" id="module-news">
+          <div class="card-title">
+            <h3>推荐内容</h3>
+            <span class="tiny">Module C</span>
+          </div>
+          <div class="module-body">正在加载推荐内容...</div>
+        </section>
+
+        <section class="card card-pad module loading" id="module-gallery">
+          <div class="card-title">
+            <h3>图文卡片</h3>
+            <span class="tiny">Module D</span>
+          </div>
+          <div class="module-body">正在加载图文卡片...</div>
+        </section>
       </section>
 
-      <section class="card card-pad module loading" id="module-news">
-        <div class="card-title">
-          <h3>Critical Recommendations</h3>
-          <span class="tiny">Critical Module B</span>
-        </div>
-        <div class="module-body">Loading critical recommendations...</div>
-      </section>
+      <aside class="content-feed">
+        <section class="card card-pad module loading" id="module-docs">
+          <div class="card-title">
+            <h3>下载与附件</h3>
+            <span class="tiny">Module E</span>
+          </div>
+          <div class="module-body">正在加载附件信息...</div>
+        </section>
+
+        <section class="card card-pad module loading" id="module-sidefeed">
+          <div class="card-title">
+            <h3>热点与推荐</h3>
+            <span class="tiny">Module F</span>
+          </div>
+          <div class="module-body">正在加载侧边推荐...</div>
+        </section>
+      </aside>
     </section>
 
     <div class="statusbar">
       <div class="status-left">
-        <div class="status-line" id="status-line">Waiting for first-screen critical resources and modules to finish loading...</div>
-        <div class="progress">
+        <div class="status-line" id="status-line">正在等待首屏所有关键图片真正加载完成……</div>
+        <div class="progress" aria-label="load progress">
           <div id="progress-bar"></div>
         </div>
-        <div class="status-line">
-          In this version, below-the-fold content is treated as uncritical and is not included in the first-screen start condition.
+        <div class="status-line" id="status-hint">
+          提示：下一关会刷新页面
         </div>
       </div>
 
       <div class="controls">
-        <button class="btn-like" id="restart-page">Restart (Level 1)</button>
-        <button class="btn-like primary" id="force-start" disabled>Force Start (Debug)</button>
+        <button class="btn-like" id="restart-page">重新开始（第 1 关）</button>
+        <button class="btn-like primary" id="force-start" disabled>强制开始（调试用）</button>
       </div>
     </div>
 
-    <section class="below-fold">
-      <section class="card lazy-section" id="lazy-quick" data-lazy-kind="quick">
-        <div class="placeholder-shell">
-          <div class="placeholder-title"></div>
-          <div class="skeleton-list">
-            <div class="skeleton-row"></div>
-            <div class="skeleton-row"></div>
-            <div class="skeleton-row"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card lazy-section" id="lazy-gallery" data-lazy-kind="gallery">
-        <div class="placeholder-shell">
-          <div class="placeholder-title"></div>
-          <div class="skeleton-grid">
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-            <div class="skeleton-card"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card lazy-section" id="lazy-docs" data-lazy-kind="docs">
-        <div class="placeholder-shell">
-          <div class="placeholder-title"></div>
-          <div class="skeleton-list">
-            <div class="skeleton-row"></div>
-            <div class="skeleton-row"></div>
-            <div class="skeleton-row"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card lazy-section" id="lazy-sidefeed" data-lazy-kind="sidefeed">
-        <div class="placeholder-shell">
-          <div class="placeholder-title"></div>
-          <div class="skeleton-list">
-            <div class="skeleton-row"></div>
-            <div class="skeleton-row"></div>
-            <div class="skeleton-row"></div>
-          </div>
-        </div>
-      </section>
-    </section>
-
     <div class="footer-area">
-      This version is a "first-screen optimization + below-the-fold scroll-triggered loading" model. Only the key content required for the user to start the task is kept on the first screen, while the rest is treated as uncritical and loaded later when the user scrolls.
+      本页面为实验用半优化网站模型（采用 unop 布局样式）。当前版本已改为：必须等首屏所有关键图片真正加载完成后才显示数字。
     </div>
   </main>
 
   <div class="game-overlay" id="game-overlay">
     <div class="panel">
       <div class="panel-head">
-        <div><div class="h" id="panel-title">Waiting for loading to finish...</div></div>
+        <div><div class="h" id="panel-title">等待加载完成…</div></div>
         <div class="mini" id="panel-mini">-</div>
       </div>
 
       <div class="panel-body">
         <div class="block">
-          <div class="block-title">Number Display</div>
+          <div class="block-title">数字展示（Number Display）</div>
           <div class="number" id="game-number">---</div>
 
           <div class="input-row" id="input-row" style="display:none;">
-            <input id="guess-input" placeholder="Please enter the 3-digit number you just saw" />
-            <button class="primary" id="submit-btn">Submit</button>
-            <button id="close-btn" style="display:none;">Close</button>
-            <button id="restart-btn" style="display:none;">Restart (Level 1)</button>
-            <button id="next-btn" style="display:none;">Next Level</button>
+            <input id="guess-input" placeholder="请输入刚才看到的 3 位数字" />
+            <button class="primary" id="submit-btn">提交</button>
+            <button id="close-btn" style="display:none;">关闭</button>
+            <button id="restart-btn" style="display:none;">返回主页（失败截图后点击）</button>
+            <button id="next-btn" style="display:none;">下一关</button>
           </div>
 
           <div class="status-line" id="game-status" style="margin-top:10px;color:var(--muted);white-space:pre-line;"></div>
         </div>
 
         <div class="block">
-          <div class="block-title">Full Feedback</div>
-          <div class="feedback" id="feedback">(Full information will be shown here after the game ends)</div>
+          <div class="block-title">全量反馈（Full Feedback）</div>
+          <div class="feedback" id="feedback">（游戏结束后会在这里输出完整信息）</div>
         </div>
       </div>
     </div>
   </div>
 
 <script>
-/* =========================
-   1) Parameters
-========================= */
+function getIntParam(name, fallback){
+  var params = new URLSearchParams(window.location.search);
+  var v = parseInt(params.get(name), 10);
+  return isNaN(v) ? fallback : v;
+}
+function getStrParam(name, fallback){
+  var params = new URLSearchParams(window.location.search);
+  var v = params.get(name);
+  return (v == null || v === "") ? fallback : v;
+}
+
 var level = getIntParam("level", 1);
 if (level < 1) level = 1;
 var run = getStrParam("run", String(Date.now()));
+
+// 故意做一点主线程阻塞
+(function heavySyncTask(){
+  var temp = [];
+  for (var round = 0; round < 18; round++){
+    for (var i = 0; i < 2600; i++){
+      temp.push("node-" + round + "-" + i);
+    }
+  }
+  temp.reverse();
+  window.__dummyInitSize = temp.length;
+})();
 
 function expBudget(level, startMs, ratio, minMs){
   var raw = startMs * Math.pow(ratio, level - 1);
   return Math.max(minMs, Math.round(raw));
 }
-
-var levelTimeLimit = expBudget(level, 7000, 0.8, 500);
+var levelTimeLimit = expBudget(level, 13000, 0.8, 500);
 var idealDisplayTime = expBudget(level, 1000, 0.90, 150);
 
 var navEntry = performance.getEntriesByType("navigation")[0];
 var navStartTime = navEntry ? navEntry.startTime : 0;
 
-/* =========================
-   2) Badges
-========================= */
+// badges
 var badgeLevel = document.getElementById("badge-level");
 var badgeBudget = document.getElementById("badge-budget");
 var badgeRemaining = document.getElementById("badge-remaining");
@@ -855,10 +800,8 @@ badgeBudget.textContent = "Budget: " + levelTimeLimit + "ms";
 badgeRemaining.textContent = "Remaining: ...";
 badgeState.textContent = "State: loading";
 
-/* =========================
-   3) Stats
-========================= */
-var STATS_KEY = "slow_site_game_stats_fs_scrolllazy_no_preload_v1";
+// statistics
+var STATS_KEY = "slow_site_game_stats_v1";
 
 function loadStats(){
   try{
@@ -888,9 +831,7 @@ function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull){
   return s;
 }
 
-/* =========================
-   4) Device / Network
-========================= */
+// network
 var deviceInfo = {
   hardwareConcurrency: navigator.hardwareConcurrency || "N/A",
   deviceMemory: navigator.deviceMemory || "N/A",
@@ -901,31 +842,34 @@ var networkRTT = conn && typeof conn.rtt === "number" ? conn.rtt : "N/A";
 var networkDownlink = conn && typeof conn.downlink === "number" ? conn.downlink : "N/A";
 var effectiveType = conn && conn.effectiveType ? conn.effectiveType : "N/A";
 
-var throttleProfile = {
-  enabled: true,
-  profileName: "controlled-first-screen-scroll-lazy-no-preload",
-  simulatedRttMs: 300,
-  simulatedJitterMs: 50,
-  simulatedDownKbps: 1600
-};
-
-/* =========================
-   5) Gate resources
-========================= */
+// 首屏图片
 var criticalNodes = document.querySelectorAll("img.critical");
-var criticalTarget = criticalNodes.length;
-var moduleTarget = 2;
+var gateNodes = criticalNodes;
+
+// 严格首屏门控：必须等首屏所有关键图都真正加载成功后才开始
+var gateTarget = gateNodes.length > 0 ? gateNodes.length : 1;
+
+var visualTarget = criticalNodes.length;
+var moduleTarget = 0;
 
 var statusLine = document.getElementById("status-line");
 var progressBar = document.getElementById("progress-bar");
 var topProgressBar = document.getElementById("top-progress-bar");
 var forceStartBtn = document.getElementById("force-start");
 
-var criticalLoadedCount = 0;
+var gateLoadedCount = 0;      // 门控完成度（首屏所有关键图成功加载）
+var visualLoadedCount = 0;    // 所有首屏图片成功加载数
+var visualFinishedCount = 0;  // 所有首屏图片已完成（load/error）数
+var criticalErrorCount = 0;   // 首屏关键图失败数
 var moduleLoadedCount = 0;
-var gateTriggered = false;
+
 var gameEnded = false;
+var gateTriggered = false;
 var deferredNoTimeShown = false;
+
+function isGateImageNode(node){
+  return !!node;
+}
 
 var imgMetrics = [];
 for (var i = 0; i < criticalNodes.length; i++){
@@ -933,18 +877,16 @@ for (var i = 0; i < criticalNodes.length; i++){
     idx: i + 1,
     status: "pending",
     endMs: null,
-    role: criticalNodes[i].getAttribute("data-role") || "critical"
+    role: criticalNodes[i].getAttribute("data-role") || "critical",
+    isGate: isGateImageNode(criticalNodes[i])
   });
 }
 
-var moduleMetrics = [];
-var lazySectionMetrics = [];
-
-function gateTotal(){
-  return criticalTarget + moduleTarget;
-}
 function currentGateScore(){
-  return criticalLoadedCount + moduleLoadedCount;
+  return gateLoadedCount;
+}
+function gateTotal(){
+  return gateTarget;
 }
 function updateProgress(){
   var pct = Math.round((currentGateScore() / gateTotal()) * 100);
@@ -952,51 +894,96 @@ function updateProgress(){
   if (topProgressBar) topProgressBar.style.width = pct + "%";
 
   statusLine.textContent =
-    "Waiting for first-screen critical resources and modules to finish loading...\n" +
-    "Critical images: " + criticalLoadedCount + "/" + criticalTarget +
-    " | Critical modules: " + moduleLoadedCount + "/" + moduleTarget +
-    " | Total progress: " + pct + "%";
+    "正在等待首屏所有关键图片真正加载完成……\n" +
+    "首屏关键图成功: " + gateLoadedCount + "/" + gateTarget +
+    " | 首屏已完成(含失败): " + visualFinishedCount + "/" + visualTarget +
+    " | 首屏失败: " + criticalErrorCount +
+    " | 下方模块已加载: " + moduleLoadedCount + "（不影响开始）" +
+    " | 开始门控进度: " + pct + "%";
 }
+
 function markCriticalWrap(idx, ok){
   var wrap = document.getElementById("critical-wrap-" + idx);
   if (!wrap) return;
   wrap.classList.add(ok ? "loaded" : "error");
 }
+
 function finalizeImage(idx, ok){
   if (imgMetrics[idx - 1].status !== "pending") return;
+
   imgMetrics[idx - 1].status = ok ? "load" : "error";
   imgMetrics[idx - 1].endMs = performance.now() - navStartTime;
-  criticalLoadedCount++;
+
+  visualFinishedCount++;
+  if (ok){
+    visualLoadedCount++;
+    if (imgMetrics[idx - 1].isGate){
+      gateLoadedCount++;
+    }
+  } else {
+    criticalErrorCount++;
+  }
+
   markCriticalWrap(idx, ok);
   updateProgress();
   tryTriggerGate();
 }
 
 /* =========================
-   6) Critical image loading
-   No preload, set src normally
+   模拟慢图片加载
 ========================= */
+function makeImageUrl(seed, w, h){
+  return "https://picsum.photos/" + w + "/" + h + "?random=" + seed + "&lv=" + encodeURIComponent(level) + "&run=" + encodeURIComponent(run);
+}
+
 function loadCriticalImage(img, idx){
-  var url = idx === 1 ? makeImageUrl(301, 1280, 720) : makeImageUrl(302, 480, 480);
-  var artificialDelay = idx === 1 ? 50 : 110;
+  var role = img.getAttribute("data-role") || "thumb";
+  var artificialDelay;
 
-  img.addEventListener("load", function(){ finalizeImage(idx, true); }, { once:true });
-  img.addEventListener("error", function(){ finalizeImage(idx, false); }, { once:true });
+  if (role === "hero"){
+    artificialDelay = 120 + (level - 1) * 60;
+  } else {
+    artificialDelay = 550 + idx * 220 + (level - 1) * 100;
+  }
 
+  var url = (idx === 1)
+    ? makeImageUrl(100 + idx, 1600, 900)
+    : makeImageUrl(100 + idx, 800, 800);
+
+  var attempts = 0;
+  var maxAttempts = 3;
+
+  function attachOnce(){
+    img.addEventListener("load", handleLoad, { once:true });
+    img.addEventListener("error", handleError, { once:true });
+  }
+
+  function handleLoad(){
+    finalizeImage(idx, true);
+  }
+
+  function handleError(){
+    attempts++;
+    if (attempts < maxAttempts){
+      attachOnce();
+      setTimeout(function(){
+        img.src = url + "&retry=" + attempts + "&ts=" + Date.now();
+      }, 180 + attempts * 160);
+      return;
+    }
+    finalizeImage(idx, false);
+  }
+
+  attachOnce();
   setTimeout(function(){
     img.src = url;
   }, artificialDelay);
 }
 
-for (var j = 0; j < criticalNodes.length; j++){
-  loadCriticalImage(criticalNodes[j], j + 1);
-}
+// 统一延迟 4 秒后，页面才真正开始加载资源
+var PRELOAD_SLEEP_MS = 4000;
 
-updateProgress();
-
-/* =========================
-   7) Critical modules only
-========================= */
+var moduleMetrics = [];
 function recordModuleLoaded(id){
   moduleLoadedCount++;
   moduleMetrics.push({
@@ -1018,31 +1005,150 @@ function fakeModuleLoad(id, delay, html){
   }, delay);
 }
 
-var baseModuleDelay = 340 + (level - 1) * 70;
+function startAllPageLoading(){
+  // 开始首屏关键图片加载
+  for (var j = 0; j < criticalNodes.length; j++){
+    loadCriticalImage(criticalNodes[j], j + 1);
+  }
 
-fakeModuleLoad(
-  "module-nav",
-  baseModuleDelay,
-  '<div class="list-block">' +
-    '<div class="list-item">Home<div class="muted">Priority critical navigation</div></div>' +
-    '<div class="list-item">Recommendations<div class="muted">Essential first-screen entry</div></div>' +
-    '<div class="list-item">Categories<div class="muted">Quick start area</div></div>' +
+  var baseModuleDelay = 700 + (level - 1) * 120;
+
+  fakeModuleLoad("module-nav", baseModuleDelay + 0,
+    '<div class="side-list">' +
+      '<div class="list-item">综合首页<div class="muted">入口已加载</div></div>' +
+      '<div class="list-item">推荐频道<div class="muted">分类模块</div></div>' +
+      '<div class="list-item">最新更新<div class="muted">导航索引</div></div>' +
+      '<div class="list-item">站内专题<div class="muted">辅助入口</div></div>' +
+    '</div>'
+  );
+
+  fakeModuleLoad("module-quick", baseModuleDelay + 500,
+    '<div class="side-list">' +
+      '<div class="list-item">快捷入口 A<div class="muted">部分内容加载较慢</div></div>' +
+      '<div class="list-item">快捷入口 B<div class="muted">模拟老旧门户站</div></div>' +
+      '<div class="list-item">快捷入口 C<div class="muted">这是一个快捷入口</div></div>' +
+    '</div>'
+  );
+
+  fakeModuleLoad("module-news", baseModuleDelay + 900,
+    '<div class="news-list">' +
+      '<div class="list-item"><strong>推荐内容 01</strong><div class="news-meta">计算机python教程</div></div>' +
+      '<div class="list-item"><strong>推荐内容 02</strong><div class="news-meta">java从毕业到失业</div></div>' +
+      '<div class="list-item"><strong>推荐内容 03</strong><div class="news-meta">ruby语言科普</div></div>' +
+    '</div>'
+  );
+
+  fakeModuleLoad("module-gallery", baseModuleDelay + 1400,
+    '<div class="feed-grid">' +
+      makeFeedCard(6, "通用慢网站卡片 A", "图片1") +
+      makeFeedCard(7, "通用慢网站卡片 B", "图片2") +
+      makeFeedCard(8, "通用慢网站卡片 C", "图片3") +
+      makeFeedCard(9, "通用慢网站卡片 D", "图片4") +
+      makeFeedCard(10, "通用慢网站卡片 E", "图片5") +
+      makeFeedCard(11, "通用慢网站卡片 F", "图片67") +
+    '</div>'
+  );
+
+  fakeModuleLoad("module-docs", baseModuleDelay + 1900,
+    '<div class="doc-list">' +
+      '<div class="list-item"><strong>附件说明.pdf</strong><div class="doc-meta">模拟文档与下载区加载较慢的情况</div></div>' +
+      '<div class="list-item"><strong>资源列表.xlsx</strong><div class="doc-meta">老旧系统中常见的附件模块</div></div>' +
+      '<div class="list-item"><strong>历史记录.zip</strong><div class="doc-meta">模块非首屏，但会拖长整页完成时间</div></div>' +
+    '</div>'
+  );
+
+  fakeModuleLoad("module-sidefeed", baseModuleDelay + 2400,
+    '<div class="side-list">' +
+      '<div class="list-item">热点推荐 1<div class="muted">用户可见但较晚到达</div></div>' +
+      '<div class="list-item">热点推荐 2<div class="muted">典型未优化页面体验</div></div>' +
+      '<div class="list-item">热点推荐 3<div class="muted">页面内容非同步完成</div></div>' +
+    '</div>'
+  );
+
+  updateProgress();
+}
+
+statusLine.textContent =
+  "页面已进入固定等待阶段（4 秒），等待结束后才开始加载首屏资源……";
+badgeState.textContent = "State: pre_sleep_4s";
+
+setTimeout(function(){
+  if (!gameEnded){
+    badgeState.textContent = "State: loading";
+    statusLine.textContent =
+      "固定等待 4 秒结束，开始加载首屏关键图片……";
+    startAllPageLoading();
+  }
+}, PRELOAD_SLEEP_MS);
+
+updateProgress();
+
+var baseModuleDelay = 700 + (level - 1) * 120;
+
+fakeModuleLoad("module-nav", baseModuleDelay + 0,
+  '<div class="side-list">' +
+    '<div class="list-item">综合首页<div class="muted">入口已加载</div></div>' +
+    '<div class="list-item">推荐频道<div class="muted">分类模块</div></div>' +
+    '<div class="list-item">最新更新<div class="muted">导航索引</div></div>' +
+    '<div class="list-item">站内专题<div class="muted">辅助入口</div></div>' +
   '</div>'
 );
 
-fakeModuleLoad(
-  "module-news",
-  baseModuleDelay + 180,
-  '<div class="list-block">' +
-    '<div class="list-item"><strong>Recommended Content A</strong><div class="muted">Critical first-screen content displayed earlier</div></div>' +
-    '<div class="list-item"><strong>Recommended Content B</strong><div class="muted">Below-the-fold content no longer competes for first-screen resources</div></div>' +
-    '<div class="list-item"><strong>Recommended Content C</strong><div class="muted">Only the information required to start the task is kept</div></div>' +
+fakeModuleLoad("module-quick", baseModuleDelay + 500,
+  '<div class="side-list">' +
+    '<div class="list-item">快捷入口 A<div class="muted">部分内容加载较慢</div></div>' +
+    '<div class="list-item">快捷入口 B<div class="muted">模拟老旧门户站</div></div>' +
+    '<div class="list-item">快捷入口 C<div class="muted">这是一个快捷入口</div></div>' +
   '</div>'
 );
 
-/* =========================
-   8) Countdown
-========================= */
+fakeModuleLoad("module-news", baseModuleDelay + 900,
+  '<div class="news-list">' +
+    '<div class="list-item"><strong>推荐内容 01</strong><div class="news-meta">计算机python教程</div></div>' +
+    '<div class="list-item"><strong>推荐内容 02</strong><div class="news-meta">java从毕业到失业</div></div>' +
+    '<div class="list-item"><strong>推荐内容 03</strong><div class="news-meta">ruby语言科普</div></div>' +
+  '</div>'
+);
+
+fakeModuleLoad("module-gallery", baseModuleDelay + 1400,
+  '<div class="feed-grid">' +
+    makeFeedCard(6, "通用慢网站卡片 A", "图片1") +
+    makeFeedCard(7, "通用慢网站卡片 B", "图片2") +
+    makeFeedCard(8, "通用慢网站卡片 C", "图片3") +
+    makeFeedCard(9, "通用慢网站卡片 D", "图片4") +
+    makeFeedCard(10, "通用慢网站卡片 E", "图片5") +
+    makeFeedCard(11, "通用慢网站卡片 F", "图片67") +
+  '</div>'
+);
+
+fakeModuleLoad("module-docs", baseModuleDelay + 1900,
+  '<div class="doc-list">' +
+    '<div class="list-item"><strong>附件说明.pdf</strong><div class="doc-meta">模拟文档与下载区加载较慢的情况</div></div>' +
+    '<div class="list-item"><strong>资源列表.xlsx</strong><div class="doc-meta">老旧系统中常见的附件模块</div></div>' +
+    '<div class="list-item"><strong>历史记录.zip</strong><div class="doc-meta">模块非首屏，但会拖长整页完成时间</div></div>' +
+  '</div>'
+);
+
+fakeModuleLoad("module-sidefeed", baseModuleDelay + 2400,
+  '<div class="side-list">' +
+    '<div class="list-item">热点推荐 1<div class="muted">用户可见但较晚到达</div></div>' +
+    '<div class="list-item">热点推荐 2<div class="muted">典型未优化页面体验</div></div>' +
+    '<div class="list-item">热点推荐 3<div class="muted">页面内容非同步完成</div></div>' +
+  '</div>'
+);
+
+function makeFeedCard(seed, title, desc){
+  var src = makeImageUrl(seed, 800, 520);
+  return '' +
+    '<article class="feed-card">' +
+      '<div class="thumb"><img src="' + src + '" alt="' + title + '"></div>' +
+      '<div class="body">' +
+        '<h4>' + title + '</h4>' +
+        '<p>' + desc + '</p>' +
+      '</div>' +
+    '</article>';
+}
+
 var countdownTimer = null;
 var timeUp = false;
 var timeUpAt = null;
@@ -1078,14 +1184,26 @@ function startLoadCountdown(){
 }
 startLoadCountdown();
 
+function afterStrictGatePaint(cb){
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      cb();
+    });
+  });
+}
+
 function tryTriggerGate(){
   if (gateTriggered || gameEnded) return;
-  if (criticalLoadedCount >= criticalTarget && moduleLoadedCount >= moduleTarget){
+
+  if (gateLoadedCount >= gateTarget && criticalErrorCount === 0){
     gateTriggered = true;
     forceStartBtn.disabled = false;
-    freezeLoadCountdown();
-    badgeState.textContent = "State: ready";
-    onGateReady();
+    badgeState.textContent = "State: ready_after_first_paint";
+    afterStrictGatePaint(function(){
+      if (gameEnded) return;
+      badgeState.textContent = "State: ready";
+      onGateReady();
+    });
   }
 }
 
@@ -1095,23 +1213,29 @@ var metrics = {
   levelTimeLimit: levelTimeLimit,
   idealDisplayTime: idealDisplayTime,
   navStartTime: navStartTime,
+
   gateReadyAt: null,
   loadDurationAtGate: null,
+
   actualDisplayTime: null,
+  leftoverAtStartGame: null,
   numberShownAt: null,
   numberHiddenAt: null,
+
   userSubmitAt: null,
   userGuess: null,
   result: null,
-  criticalLoadedCount: 0,
+
+  gateLoadedCount: 0,
+  visualLoadedCount: 0,
   moduleLoadedCount: 0,
   imgMetrics: imgMetrics,
   moduleMetrics: moduleMetrics,
-  lazySectionMetrics: lazySectionMetrics
+  leftoverAtStartGame: null,
 };
 
 /* =========================
-   9) Game logic
+   游戏逻辑
 ========================= */
 var gameOverlay = document.getElementById("game-overlay");
 var panelTitle = document.getElementById("panel-title");
@@ -1141,10 +1265,12 @@ function onGateReady(){
 
   metrics.gateReadyAt = performance.now() - navStartTime;
   metrics.loadDurationAtGate = metrics.gateReadyAt;
-  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.gateLoadedCount = gateLoadedCount;
+  metrics.visualLoadedCount = visualLoadedCount;
   metrics.moduleLoadedCount = moduleLoadedCount;
 
-  if (metrics.loadDurationAtGate > levelTimeLimit){
+  var loadTooSlow = metrics.loadDurationAtGate > levelTimeLimit;
+  if (loadTooSlow){
     metrics.result = "no_time_load";
     badgeState.textContent = "State: load_time_up_after_gate";
     showDeferredLoadNoTimeAfterGate();
@@ -1154,6 +1280,24 @@ function onGateReady(){
   badgeState.textContent = "State: ready_to_play";
   startGame();
 }
+
+var numberHideWatcher = null;
+
+function hideNumberAndEnableInput(){
+  if (gameEnded) return;
+
+  gameNumber.style.display = "none";
+  guessInput.value = "";
+  guessInput.focus();
+
+  metrics.numberHiddenAt = performance.now() - navStartTime;
+  badgeRemaining.textContent = "Remaining(load): 0ms";
+  timeUp = true;
+  timeUpAt = performance.now() - navStartTime;
+
+  gameStatus.textContent = "请输入刚才看到的 3 位数字：";
+}
+
 function startGame(){
   if (gameEnded || timeUp) return;
 
@@ -1165,22 +1309,24 @@ function startGame(){
 
   var now = performance.now();
   var used = now - navStartTime;
-  var leftover = levelTimeLimit - used;
+  var leftover = Math.max(0, levelTimeLimit - used);
 
-  panelTitle.textContent = "Level " + level + ": first-screen critical path completed";
+  panelTitle.textContent = "第 " + level + " 关：首屏所有关键图已完成";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
     "Used until gate: " + Math.round(used) + "ms\n" +
-    "Critical: " + criticalLoadedCount + "/" + criticalTarget + "\n" +
-    "Critical Modules: " + moduleLoadedCount + "/" + moduleTarget;
+    "Remaining(now): " + Math.round(leftover) + "ms\n" +
+    "All first-screen critical images loaded: " + gateLoadedCount + "/" + gateTarget + "\n" +
+    "First-screen finished (load/error): " + visualFinishedCount + "/" + visualTarget + "\n" +
+    "Modules: " + moduleLoadedCount + "（not required）";
 
   if (leftover <= 0){
     endByNoTime();
     return;
   }
 
-  var actualDisplay = Math.min(idealDisplayTime, leftover);
-  metrics.actualDisplayTime = actualDisplay;
+  metrics.actualDisplayTime = leftover;
+  metrics.leftoverAtStartGame = leftover;
 
   generateCode();
   gameNumber.style.display = "block";
@@ -1188,17 +1334,28 @@ function startGame(){
   metrics.numberShownAt = performance.now() - navStartTime;
 
   gameStatus.textContent =
-    "The number will be hidden shortly. Please memorize the 3-digit number.\n" +
-    "This version only optimizes the first screen; below-the-fold content will load only after scrolling.";
+    "数字会一直显示到本关倒计时真正结束。\n" +
+    "本版本采用严格首屏门控：首屏所有关键图片真正加载完成后才开始。";
 
-  setTimeout(function(){
+  if (numberHideWatcher) {
+    cancelAnimationFrame(numberHideWatcher);
+    numberHideWatcher = null;
+  }
+
+  function watchNumber(){
     if (gameEnded) return;
-    gameNumber.style.display = "none";
-    guessInput.value = "";
-    guessInput.focus();
-    metrics.numberHiddenAt = performance.now() - navStartTime;
-    gameStatus.textContent = "Please enter the 3-digit number you just saw:";
-  }, actualDisplay);
+
+    var remaining = getLoadRemainingMs();
+
+    if (remaining <= 0){
+      hideNumberAndEnableInput();
+      return;
+    }
+
+    numberHideWatcher = requestAnimationFrame(watchNumber);
+  }
+
+  numberHideWatcher = requestAnimationFrame(watchNumber);
 }
 
 function formatReport(){
@@ -1209,57 +1366,33 @@ function formatReport(){
     : "N/A";
 
   var lines = [];
+  lines.push("semioptimized version");
   lines.push("===== Experiment Metrics =====");
   lines.push("");
-  lines.push("Version: first_screen_scroll_lazy_no_preload");
   lines.push("LevelReached: " + level);
   lines.push("Result: " + (metrics.result || "N/A"));
   lines.push("LoadTime(ms): " + loadTime);
   lines.push("ActualDisplayTime(ms): " + (metrics.actualDisplayTime != null ? Math.round(metrics.actualDisplayTime) : "N/A"));
   lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
-  lines.push("CriticalLoadedAtGate: " + metrics.criticalLoadedCount + "/" + criticalTarget);
-  lines.push("CriticalModulesAtGate: " + metrics.moduleLoadedCount + "/" + moduleTarget);
-  lines.push("");
-  lines.push("----- Experiment Profile -----");
-  lines.push("ThrottleEnabled: " + throttleProfile.enabled);
-  lines.push("ThrottleProfileName: " + throttleProfile.profileName);
-  lines.push("SimulatedRTT(ms): " + throttleProfile.simulatedRttMs);
-  lines.push("SimulatedJitter(ms): " + throttleProfile.simulatedJitterMs);
-  lines.push("SimulatedDownlink(Kbps): " + throttleProfile.simulatedDownKbps);
+  lines.push("GateLoadedAtStart(all critical success): " + metrics.gateLoadedCount + "/" + gateTarget);
+  lines.push("AllFirstScreenImagesLoadedAtStart: " + metrics.visualLoadedCount + "/" + visualTarget);
+  lines.push("ModulesLoadedAtGate: " + metrics.moduleLoadedCount + "（not required）");
   lines.push("");
   lines.push("----- Device Performance -----");
   lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);
   lines.push("DeviceMemory(GB): " + deviceInfo.deviceMemory);
   lines.push("Browser: " + deviceInfo.userAgent);
   lines.push("");
-  lines.push("----- Network API -----");
+  lines.push("----- Network -----");
   lines.push("RTT(ms): " + networkRTT);
   lines.push("Downlink(Mb/s): " + networkDownlink);
   lines.push("EffectiveType: " + effectiveType);
   lines.push("");
-  lines.push("----- Critical Image Metrics -----");
-  for (var i = 0; i < metrics.imgMetrics.length; i++){
-    var m = metrics.imgMetrics[i];
-    lines.push("IMG" + m.idx + ": " + m.status + " @ " + (m.endMs != null ? Math.round(m.endMs) + "ms" : "N/A"));
-  }
-  lines.push("");
-  lines.push("----- Critical Module Metrics -----");
-  for (var j = 0; j < moduleMetrics.length; j++){
-    lines.push(moduleMetrics[j].id + ": " + moduleMetrics[j].loadedAt + "ms");
-  }
-  lines.push("");
-  lines.push("----- Lazy Below-the-fold Metrics -----");
-  if (lazySectionMetrics.length === 0){
-    lines.push("No lazy sections triggered before end of round.");
-  } else {
-    for (var k = 0; k < lazySectionMetrics.length; k++){
-      lines.push(
-        lazySectionMetrics[k].id +
-        ": observed@" + lazySectionMetrics[k].observedAt + "ms" +
-        ", loaded@" + lazySectionMetrics[k].loadedAt + "ms"
-      );
-    }
-  }
+  lines.push("LeftoverTimeAtGameStart(ms): " + (
+    metrics.leftoverAtStartGame != null
+      ? Math.round(metrics.leftoverAtStartGame)
+      : "N/A"
+  ));
   return lines.join("\n");
 }
 
@@ -1284,7 +1417,10 @@ function finishRound(result){
   try{
     feedbackEl.textContent = formatReport();
   }catch(e){
-    feedbackEl.textContent = "ReportError: " + (e && e.message ? e.message : String(e));
+    feedbackEl.textContent =
+      "ReportError: " + (e && e.message ? e.message : String(e)) + "\n" +
+      "Result: " + result;
+    console.error("[finishRound] formatReport failed:", e);
   }
 }
 
@@ -1293,7 +1429,7 @@ function showDeferredLoadNoTimeAfterGate(){
   deferredNoTimeShown = true;
 
   showOverlayBase();
-  panelTitle.textContent = "Ended: load timeout";
+  panelTitle.textContent = "结束：加载阶段超时（load timeout）";
   panelMini.textContent =
     "Budget(Time Budget): " + levelTimeLimit + "ms\n" +
     "Gate finished at: " + Math.round(metrics.gateReadyAt) + "ms\n" +
@@ -1303,7 +1439,8 @@ function showDeferredLoadNoTimeAfterGate(){
   gameNumber.style.display = "block";
 
   gameStatus.textContent =
-    "When the first-screen critical gate was reached, the loading time had already exceeded the budget, so this round is judged as a loading-stage timeout.";
+    "本实验评估首屏所有关键图片真正加载完成前的等待体验。\n" +
+    "在首屏全部关键图片完成前，加载耗时已超过预算，因此判定为加载阶段超时。";
 
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
@@ -1316,11 +1453,11 @@ function showDeferredLoadNoTimeAfterGate(){
 
 function endByNoTime(){
   showOverlayBase();
-  panelTitle.textContent = "Ended: insufficient time";
+  panelTitle.textContent = "结束：时间不足";
   panelMini.textContent = "Budget(Time Budget): " + levelTimeLimit + "ms";
   gameNumber.textContent = "— — —";
   gameNumber.style.display = "block";
-  gameStatus.textContent = "There is not enough remaining time in this round to display the number.";
+  gameStatus.textContent = "本关剩余时间不足，无法展示数字。";
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
   nextBtn.style.display = "none";
@@ -1338,12 +1475,12 @@ submitBtn.addEventListener("click", function(){
   metrics.userSubmitAt = performance.now() - navStartTime;
 
   if (guess === currentCode){
-    panelTitle.textContent = "Passed: correct answer";
-    gameStatus.textContent = "You answered correctly. You may proceed to the next level.";
+    panelTitle.textContent = "通过：回答正确";
+    gameStatus.textContent = "你答对了。可进入下一关（会刷新页面并重新模拟慢加载）。";
     finishRound("correct");
   } else {
-    panelTitle.textContent = "Ended: wrong answer";
-    gameStatus.textContent = "You answered incorrectly. This experiment ends here.";
+    panelTitle.textContent = "结束：回答错误";
+    gameStatus.textContent = "你答错了。本次实验结束。";
     finishRound("wrong");
   }
 });
@@ -1358,10 +1495,7 @@ closeBtn.addEventListener("click", function(){
 
 restartBtn.addEventListener("click", function(){
   try{ localStorage.removeItem(STATS_KEY); }catch(e){}
-  var url = new URL(window.location.href);
-  url.searchParams.set("level", 1);
-  url.searchParams.set("run", String(Date.now()));
-  window.location.href = url.toString();
+  window.location.href = "index.html";
 });
 
 nextBtn.addEventListener("click", function(){
@@ -1386,20 +1520,22 @@ forceStartBtn.addEventListener("click", function(){
     if (imgMetrics[i].status === "pending"){
       imgMetrics[i].status = "forced";
       imgMetrics[i].endMs = performance.now() - navStartTime;
-      criticalLoadedCount++;
+      visualFinishedCount++;
+      criticalErrorCount++;
       markCriticalWrap(i + 1, false);
     }
   }
+
   while (moduleLoadedCount < moduleTarget){
     moduleLoadedCount++;
   }
 
   updateProgress();
-  freezeLoadCountdown();
   badgeState.textContent = "State: forced";
   metrics.gateReadyAt = performance.now() - navStartTime;
   metrics.loadDurationAtGate = metrics.gateReadyAt;
-  metrics.criticalLoadedCount = criticalLoadedCount;
+  metrics.gateLoadedCount = gateLoadedCount;
+  metrics.visualLoadedCount = visualLoadedCount;
   metrics.moduleLoadedCount = moduleLoadedCount;
   startGame();
 });
@@ -1409,134 +1545,29 @@ document.getElementById("fake-search-btn").addEventListener("click", function(){
   if (btn.disabled) return;
   btn.disabled = true;
   var old = btn.textContent;
-  btn.textContent = "Searching...";
+  btn.textContent = "搜索中...";
+  badgeState.textContent = "State: interaction_wait";
   setTimeout(function(){
     btn.disabled = false;
     btn.textContent = old;
     if (!gameEnded && !gateTriggered) badgeState.textContent = "State: loading";
     else if (!gameEnded && gateTriggered) badgeState.textContent = "State: ready_to_play";
-    alert("Search results have been updated (first-screen optimized / scroll-lazy version)");
-  }, 850 + (level - 1) * 80);
+    alert("搜索结果已更新（模拟慢响应）");
+  }, 1200 + (level - 1) * 120);
 });
 
-/* =========================
-   10) Below-the-fold lazy load
-========================= */
-function makeFeedCard(seed, title, desc){
-  var src = makeImageUrl(seed, 720, 420);
-  return '' +
-    '<article class="feed-card">' +
-      '<div class="thumb"><img src="' + src + '" alt="' + title + '" loading="lazy" decoding="async" width="720" height="420"></div>' +
-      '<div class="body">' +
-        '<h4>' + title + '</h4>' +
-        '<p>' + desc + '</p>' +
-      '</div>' +
-    '</article>';
-}
-
-function renderLazySection(section, kind){
-  if (!section || section.dataset.loaded === "1") return;
-
-  section.dataset.loaded = "1";
-  var observedAt = Math.round(performance.now() - navStartTime);
-
-  var delayMap = {
-    quick: 500,
-    gallery: 900,
-    docs: 650,
-    sidefeed: 780
-  };
-  var delay = (delayMap[kind] || 700) + (level - 1) * 60;
-
+document.getElementById("fake-filter-btn").addEventListener("click", function(){
+  var btn = this;
+  if (btn.disabled) return;
+  btn.disabled = true;
+  var old = btn.textContent;
+  btn.textContent = "处理中...";
   setTimeout(function(){
-    var html = "";
-
-    if (kind === "quick"){
-      html =
-        '<div class="card-pad">' +
-          '<div class="card-title"><h3>Quick Access</h3><span class="tiny">Uncritical</span></div>' +
-          '<div class="list-block">' +
-            '<div class="list-item">Quick Access A<div class="muted">Only starts loading after scrolling</div></div>' +
-            '<div class="list-item">Quick Access B<div class="muted">Not included in the first-screen gate</div></div>' +
-            '<div class="list-item">Quick Access C<div class="muted">Below-the-fold content</div></div>' +
-          '</div>' +
-        '</div>';
-    }
-
-    if (kind === "gallery"){
-      html =
-        '<div class="card-pad">' +
-          '<div class="card-title"><h3>Image and Text Cards</h3><span class="tiny">Scroll-triggered</span></div>' +
-          '<div class="feed-grid">' +
-            makeFeedCard(311, "Image Card A", "Loads only after the user scrolls to this area") +
-            makeFeedCard(312, "Image Card B", "Removed from the critical path") +
-            makeFeedCard(313, "Image Card C", "No longer slows down the first screen") +
-            makeFeedCard(314, "Image Card D", "uncritical content") +
-            makeFeedCard(315, "Image Card E", "lazy loaded below the fold") +
-            makeFeedCard(316, "Image Card F", "Triggered only after entering the viewport") +
-          '</div>' +
-        '</div>';
-    }
-
-    if (kind === "docs"){
-      html =
-        '<div class="card-pad">' +
-          '<div class="card-title"><h3>Downloads and Attachments</h3><span class="tiny">Deferred</span></div>' +
-          '<div class="list-block">' +
-            '<div class="list-item"><strong>Attachment_Description.pdf</strong><div class="muted">Only requested after scrolling down</div></div>' +
-            '<div class="list-item"><strong>Resource_List.xlsx</strong><div class="muted">Decoupled from the first screen</div></div>' +
-            '<div class="list-item"><strong>Historical_Archive.zip</strong><div class="muted">Not included in the first-screen gate</div></div>' +
-          '</div>' +
-        '</div>';
-    }
-
-    if (kind === "sidefeed"){
-      html =
-        '<div class="card-pad">' +
-          '<div class="card-title"><h3>Hot Topics and Recommendations</h3><span class="tiny">Deferred</span></div>' +
-          '<div class="list-block">' +
-            '<div class="list-item">Hot Recommendation 1<div class="muted">scroll lazy loaded</div></div>' +
-            '<div class="list-item">Hot Recommendation 2<div class="muted">Non-critical first-screen content</div></div>' +
-            '<div class="list-item">Hot Recommendation 3<div class="muted">Treated as an uncritical area in the experiment</div></div>' +
-          '</div>' +
-        '</div>';
-    }
-
-    section.innerHTML = html;
-
-    lazySectionMetrics.push({
-      id: section.id,
-      observedAt: observedAt,
-      loadedAt: Math.round(performance.now() - navStartTime)
-    });
-  }, delay);
-}
-
-var lazySections = document.querySelectorAll(".lazy-section");
-
-if ("IntersectionObserver" in window){
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if (entry.isIntersecting){
-        var el = entry.target;
-        renderLazySection(el, el.dataset.lazyKind);
-        io.unobserve(el);
-      }
-    });
-  }, {
-    root: null,
-    rootMargin: "150px 0px",
-    threshold: 0.05
-  });
-
-  lazySections.forEach(function(el){
-    io.observe(el);
-  });
-} else {
-  lazySections.forEach(function(el){
-    renderLazySection(el, el.dataset.lazyKind);
-  });
-}
+    btn.disabled = false;
+    btn.textContent = old;
+    alert("筛选条件已应用（模拟慢交互）");
+  }, 900 + (level - 1) * 100);
+});
 </script>
 </body>
 </html>
