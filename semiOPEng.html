@@ -1435,12 +1435,14 @@ async function uploadResultToGoogleSheets() {
 async function finishRound(result){
   if (gameEnded) return;
   gameEnded = true;
+
   metrics.result = result;
 
   if (!metrics.completionCode){
     metrics.completionCode = generateCompletionCode();
   }
 
+  // ✅ ⭐⭐⭐ 关键补丁：更新统计
   updateStatsAfterRound(
     level,
     metrics.actualDisplayTime,
@@ -1489,6 +1491,7 @@ async function finishRound(result){
       gameStatus.textContent +=
         "\n\nData uploaded successfully." +
         "\nPlease copy the completion code below into the Google Form.";
+
       try{ localStorage.removeItem(STATS_KEY); }catch(e){}
     } else {
       gameStatus.textContent +=
