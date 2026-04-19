@@ -918,7 +918,7 @@
             <input id="guess-input" placeholder="Enter the 3-digit number you just saw" />
             <button class="primary" id="submit-btn">Submit</button>
             <button id="close-btn" style="display:none;">Close</button>
-            <button id="restart-btn" style="display:none;">Return to Homepage</button>
+            <button id="restart-btn" style="display:none;">Return to (AFTER YOU COPIED AND ENTERED THE COMPLETION CODE!!!)</button>
             <button id="next-btn" style="display:none;">Next Level</button>
           </div>
 
@@ -1520,32 +1520,33 @@ async function finishRound(result){
     feedbackEl.textContent = "ReportError: " + (e && e.message ? e.message : String(e));
   }
 
-  var isFailure =
-    result === "wrong" ||
-    result === "no_time" ||
-    result === "no_time_load";
-
   if (isFailure){
-    var ok = await uploadResultToGoogleSheets();
-
     var box = document.getElementById("completion-box");
     var codeEl = document.getElementById("completion-code");
 
+    // 先立刻显示 completion code
     if (box && codeEl){
       codeEl.textContent = metrics.completionCode;
       box.style.display = "block";
     }
 
-    if (ok){
-      gameStatus.textContent +=
-        "\n\nData uploaded successfully." +
-        "\nPlease copy the completion code below into the Google Form.";
-      try{ localStorage.removeItem(STATS_KEY); }catch(e){}
-    } else {
-      gameStatus.textContent +=
-        "\n\nUpload failed. Please keep a screenshot." +
-        "\nPlease still copy the completion code below into the Google Form.";
-    }
+    gameStatus.textContent +=
+      "\n\nCompletion code generated." +
+      "\nUploading data...";
+
+    // 再异步上传，不阻塞 completion code 显示
+    uploadResultToGoogleSheets().then(function(ok){
+      if (ok){
+        gameStatus.textContent +=
+          "\nData uploaded successfully." +
+          "\nPlease copy the completion code below into the Google Form.";
+        try{ localStorage.removeItem(STATS_KEY); }catch(e){}
+      } else {
+        gameStatus.textContent +=
+          "\nUpload failed. Please keep a screenshot." +
+          "\nPlease still copy the completion code below into the Google Form.";
+      }
+    });
   }
 }
 

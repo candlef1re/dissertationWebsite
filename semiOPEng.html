@@ -735,7 +735,7 @@
             <input id="guess-input" placeholder="Please enter the 3-digit number you just saw" />
             <button class="primary" id="submit-btn">Submit</button>
             <button id="close-btn" style="display:none;">Close</button>
-            <button id="restart-btn" style="display:none;">Return to Homepage</button>
+            <button id="restart-btn" style="display:none;">Return to Homepage(AFTER YOU COPIED AND ENTERED THE COMPLETION CODE!!!)</button>
             <button id="next-btn" style="display:none;">Next Level</button>
           </div>
 
@@ -1477,8 +1477,6 @@ async function finishRound(result){
     result === "no_time_load";
 
   if (isFailure){
-    var ok = await uploadResultToGoogleSheets();
-
     var box = document.getElementById("completion-box");
     var codeEl = document.getElementById("completion-code");
 
@@ -1487,17 +1485,22 @@ async function finishRound(result){
       box.style.display = "block";
     }
 
-    if (ok){
-      gameStatus.textContent +=
-        "\n\nData uploaded successfully." +
-        "\nPlease copy the completion code below into the Google Form.";
+    gameStatus.textContent +=
+      "\n\nCompletion code generated." +
+      "\nUploading data...";
 
-      try{ localStorage.removeItem(STATS_KEY); }catch(e){}
-    } else {
-      gameStatus.textContent +=
-        "\n\nUpload failed. Please keep a screenshot." +
-        "\nPlease still copy the completion code below into the Google Form.";
-    }
+    uploadResultToGoogleSheets().then(function(ok){
+      if (ok){
+        gameStatus.textContent +=
+          "\nData uploaded successfully." +
+          "\nPlease copy the completion code below into the Google Form.";
+        try{ localStorage.removeItem(STATS_KEY); }catch(e){}
+      } else {
+        gameStatus.textContent +=
+          "\nUpload failed. Please keep a screenshot." +
+          "\nPlease still copy the completion code below into the Google Form.";
+      }
+    });
   }
 }
 
