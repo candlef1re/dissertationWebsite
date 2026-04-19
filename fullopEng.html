@@ -928,6 +928,39 @@
         <div class="block">
           <div class="block-title">Full Feedback</div>
           <div class="feedback" id="feedback">(Full information will be displayed here after the game ends)</div>
+
+          <div id="completion-box" style="
+            display:none;
+            margin-top:20px;
+            padding:16px;
+            border-radius:12px;
+            background:#1e2a45;
+            border:2px solid #4da3ff;
+            text-align:center;
+          ">
+            <div style="font-size:14px; opacity:0.8;">
+              Your Completion Code
+            </div>
+
+            <div id="completion-code" style="
+              font-size:22px;
+              font-weight:bold;
+              margin:10px 0;
+              letter-spacing:2px;
+              color:#4da3ff;
+            "></div>
+
+            <button onclick="copyCode()" style="
+              padding:8px 16px;
+              border:none;
+              border-radius:8px;
+              background:#4da3ff;
+              color:white;
+              cursor:pointer;
+            ">
+              Copy Code
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1231,17 +1264,14 @@ var metrics = {
   userSubmitAt: null,
   userGuess: null,
   result: null,
+  completionCode: null,
   criticalLoadedCount: 0,
   moduleLoadedCount: 0,
   imgMetrics: imgMetrics,
   moduleMetrics: moduleMetrics,
   lazySectionMetrics: lazySectionMetrics,
-  leftoverAtStartGame: null,
+  leftoverAtStartGame: null
 };
-
-/* =========================
-   9) Game logic
-========================= */
 var gameOverlay = document.getElementById("game-overlay");
 var panelTitle = document.getElementById("panel-title");
 var panelMini = document.getElementById("panel-mini");
@@ -1276,6 +1306,10 @@ function hideNumberAndEnableInput(){
 
 function generateCode(){
   currentCode = Math.floor(100 + Math.random() * 900).toString();
+}
+
+function generateCompletionCode(){
+  return "FULL-" + Date.now() + "-" + Math.floor(1000 + Math.random() * 9000);
 }
 
 function showOverlayBase(){
@@ -1418,7 +1452,6 @@ function formatReport(){
   return lines.join("\n");
 }
 
-
 async function uploadResultToGoogleSheets() {
   var stats = loadStats();
 
@@ -1435,7 +1468,9 @@ async function uploadResultToGoogleSheets() {
     rtt: networkRTT,
     cpu: deviceInfo.hardwareConcurrency,
     averageLoadTime: avgLoad,
-    averageDisplayTime: avgDisplay
+    averageDisplayTime: avgDisplay,
+    level: level,
+    completionCode: metrics.completionCode,
   };
 
   try {
@@ -1463,11 +1498,16 @@ async function finishRound(result){
   gameEnded = true;
   metrics.result = result;
 
+  if (!metrics.completionCode){
+    metrics.completionCode = generateCompletionCode();
+  }
+
   updateStatsAfterRound(
     level,
     metrics.actualDisplayTime,
     metrics.loadDurationAtGate
   );
+
 
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
@@ -1495,13 +1535,32 @@ async function finishRound(result){
 
   if (isFailure){
     var ok = await uploadResultToGoogleSheets();
+
+    var box = document.getElementById("completion-box");
+    var codeEl = document.getElementById("completion-code");
+
+    if (box && codeEl){
+      codeEl.textContent = metrics.completionCode;
+      box.style.display = "block";
+    }
+
     if (ok){
-      gameStatus.textContent += "\n\nData uploaded successfully.";
+      gameStatus.textContent +=
+        "\n\nData uploaded successfully." +
+        "\nPlease copy the completion code below into the Google Form.";
       try{ localStorage.removeItem(STATS_KEY); }catch(e){}
     } else {
-      gameStatus.textContent += "\n\nUpload failed. Please keep a screenshot.";
+      gameStatus.textContent +=
+        "\n\nUpload failed. Please keep a screenshot." +
+        "\nPlease still copy the completion code below into the Google Form.";
     }
   }
+}
+
+function copyCode(){
+  if (!metrics.completionCode) return;
+  navigator.clipboard.writeText(metrics.completionCode);
+  alert("Code copied!");
 }
 
 function endByNoTime(){
@@ -1605,10 +1664,6 @@ document.getElementById("fake-search-btn").addEventListener("click", function(){
   }, 700 + (level - 1) * 60);
 });
 
-/* =========================
-   10) Below-the-fold lazy load
-   images also use smaller-size requests
-========================= */
 function makeFeedCard(seed, title, desc){
   var srcSmall = makeImageUrl(seed, 360, 210);
   var srcLarge = makeImageUrl(seed, 480, 280);

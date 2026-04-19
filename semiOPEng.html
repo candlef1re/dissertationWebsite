@@ -745,12 +745,48 @@
         <div class="block">
           <div class="block-title">Full Feedback</div>
           <div class="feedback" id="feedback">(Complete information will be displayed here after the game ends)</div>
+
+          <div id="completion-box" style="
+            display:none;
+            margin-top:20px;
+            padding:16px;
+            border-radius:12px;
+            background:#1e2a45;
+            border:2px solid #4da3ff;
+            text-align:center;
+          ">
+            <div style="font-size:14px; opacity:0.8;">
+              Your Completion Code
+            </div>
+
+            <div id="completion-code" style="
+              font-size:22px;
+              font-weight:bold;
+              margin:10px 0;
+              letter-spacing:2px;
+              color:#4da3ff;
+            "></div>
+
+            <button onclick="copyCode()" style="
+              padding:8px 16px;
+              border:none;
+              border-radius:8px;
+              background:#4da3ff;
+              color:white;
+              cursor:pointer;
+            ">
+              Copy Code
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
 <script>
+
+var SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyRYLhWtwaQ93ArGtN06mVAZ7xfWZ-0K4tAN_-x9MB43YX0cGB3nT_gZmPk-JsorvGLIQ/exec";
+
 function getIntParam(name, fallback){
   var params = new URLSearchParams(window.location.search);
   var v = parseInt(params.get(name), 10);
@@ -1148,13 +1184,13 @@ var metrics = {
   userSubmitAt: null,
   userGuess: null,
   result: null,
+  completionCode: null,
 
   gateLoadedCount: 0,
   visualLoadedCount: 0,
   moduleLoadedCount: 0,
   imgMetrics: imgMetrics,
-  moduleMetrics: moduleMetrics,
-  leftoverAtStartGame: null,
+  moduleMetrics: moduleMetrics
 };
 
 /* =========================
@@ -1178,6 +1214,17 @@ var currentCode = "";
 function generateCode(){
   currentCode = Math.floor(100 + Math.random() * 900).toString();
 }
+
+function generateCompletionCode(){
+  return "SEMI-" + Date.now() + "-" + Math.floor(1000 + Math.random() * 9000);
+}
+
+function copyCode(){
+  if (!metrics.completionCode) return;
+  navigator.clipboard.writeText(metrics.completionCode);
+  alert("Code copied!");
+}
+
 function showOverlayBase(){
   gameOverlay.style.display = "flex";
   inputRow.style.display = "flex";
@@ -1282,47 +1329,87 @@ function startGame(){
 }
 
 function formatReport(){
-  var loadTime = metrics.loadDurationAtGate != null ? Math.round(metrics.loadDurationAtGate) : "N/A";
-  var avgStats = updateStatsAfterRound(level, metrics.actualDisplayTime);
-  var avgDisplay = avgStats.displayCount > 0
-    ? Math.round(avgStats.totalDisplayMs / avgStats.displayCount)
+  var loadTime = metrics.loadDurationAtGate != null
+    ? Math.round(metrics.loadDurationAtGate)
+    : "N/A";
+
+  var stats = loadStats();
+  var avgDisplay = stats.displayCount > 0
+    ? Math.round(stats.totalDisplayMs / stats.displayCount)
     : "N/A";
 
   var lines = [];
-  lines.push("semioptimized version");
-  lines.push("===== Experiment Metrics =====");
+
+  lines.push("Semi-Optimized Version");
+  lines.push("===== Experiment Summary =====");
   lines.push("");
-  lines.push("LevelReached: " + level);
+
+  lines.push("Level Reached: " + level);
   lines.push("Result: " + (metrics.result || "N/A"));
-  lines.push("LoadTime(ms): " + loadTime);
-  lines.push("ActualDisplayTime(ms): " + (metrics.actualDisplayTime != null ? Math.round(metrics.actualDisplayTime) : "N/A"));
-  lines.push("AverageActualDisplayTime(ms): " + avgDisplay);
-  lines.push("GateLoadedAtStart(all critical success): " + metrics.gateLoadedCount + "/" + gateTarget);
-  lines.push("AllFirstScreenImagesLoadedAtStart: " + metrics.visualLoadedCount + "/" + visualTarget);
-  lines.push("ModulesLoadedAtGate: " + metrics.moduleLoadedCount + " (not required)");
+
   lines.push("");
-  lines.push("----- Device Performance -----");
-  lines.push("CPU_cores: " + deviceInfo.hardwareConcurrency);
-  lines.push("DeviceMemory(GB): " + deviceInfo.deviceMemory);
-  lines.push("Browser: " + deviceInfo.userAgent);
-  lines.push("");
-  lines.push("----- Network -----");
-  lines.push("RTT(ms): " + networkRTT);
-  lines.push("Downlink(Mb/s): " + networkDownlink);
-  lines.push("EffectiveType: " + effectiveType);
-  lines.push("");
-  lines.push("LeftoverTimeAtGameStart(ms): " + (
-    metrics.leftoverAtStartGame != null
-      ? Math.round(metrics.leftoverAtStartGame)
+  lines.push("----- Performance -----");
+  lines.push("Load Time (ms): " + loadTime);
+  lines.push("Display Time (ms): " + (
+    metrics.actualDisplayTime != null
+      ? Math.round(metrics.actualDisplayTime)
       : "N/A"
   ));
+  lines.push("Average Display Time (ms): " + avgDisplay);
+
+  lines.push("");
+  lines.push("----- Device -----");
+  lines.push("CPU Cores: " + deviceInfo.hardwareConcurrency);
+  lines.push("RTT (ms): " + networkRTT);
+
   return lines.join("\n");
 }
 
-function finishRound(result){
+async function uploadResultToGoogleSheets() {
+  var stats = loadStats();
+
+  var avgDisplay = stats.displayCount > 0
+    ? Math.round(stats.totalDisplayMs / stats.displayCount)
+    : null;
+
+  var payload = {
+    version: "semi",
+    rtt: networkRTT,
+    cpu: deviceInfo.hardwareConcurrency,
+    averageLoadTime: avgLoad,
+    averageDisplayTime: avgDisplay,
+    level: level,
+    completionCode: metrics.completionCode
+  };
+
+  try {
+    const res = await fetch(SHEETS_WEBAPP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    console.log("upload status:", res.status);
+    console.log("upload response:", text);
+    console.log("upload payload:", payload);
+
+    if (!res.ok) return false;
+    return true;
+  } catch (err) {
+    console.error("upload error:", err);
+    return false;
+  }
+}
+
+async function finishRound(result){
   if (gameEnded) return;
   gameEnded = true;
   metrics.result = result;
+
+  if (!metrics.completionCode){
+    metrics.completionCode = generateCompletionCode();
+  }
 
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
@@ -1344,6 +1431,34 @@ function finishRound(result){
       "ReportError: " + (e && e.message ? e.message : String(e)) + "\n" +
       "Result: " + result;
     console.error("[finishRound] formatReport failed:", e);
+  }
+
+  var isFailure =
+    result === "wrong" ||
+    result === "no_time" ||
+    result === "no_time_load";
+
+  if (isFailure){
+    var ok = await uploadResultToGoogleSheets();
+
+    var box = document.getElementById("completion-box");
+    var codeEl = document.getElementById("completion-code");
+
+    if (box && codeEl){
+      codeEl.textContent = metrics.completionCode;
+      box.style.display = "block";
+    }
+
+    if (ok){
+      gameStatus.textContent +=
+        "\n\nData uploaded successfully." +
+        "\nPlease copy the completion code below into the Google Form.";
+      try{ localStorage.removeItem(STATS_KEY); }catch(e){}
+    } else {
+      gameStatus.textContent +=
+        "\n\nUpload failed. Please keep a screenshot." +
+        "\nPlease still copy the completion code below into the Google Form.";
+    }
   }
 }
 
