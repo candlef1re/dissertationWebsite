@@ -918,7 +918,7 @@
             <input id="guess-input" placeholder="Enter the 3-digit number you just saw" />
             <button class="primary" id="submit-btn">Submit</button>
             <button id="close-btn" style="display:none;">Close</button>
-            <button id="restart-btn" style="display:none;">Return to Homepage (after screenshot)</button>
+            <button id="restart-btn" style="display:none;">Return to Homepage</button>
             <button id="next-btn" style="display:none;">Next Level</button>
           </div>
 
@@ -1252,26 +1252,18 @@ function tryTriggerGate(){
 
 var metrics = {
   level: level,
-  run: run,
-  levelTimeLimit: levelTimeLimit,
-  idealDisplayTime: idealDisplayTime,
-  navStartTime: navStartTime,
-  gateReadyAt: null,
-  loadDurationAtGate: null,
-  actualDisplayTime: null,
-  numberShownAt: null,
-  numberHiddenAt: null,
-  userSubmitAt: null,
-  userGuess: null,
   result: null,
-  completionCode: null,
-  criticalLoadedCount: 0,
-  moduleLoadedCount: 0,
-  imgMetrics: imgMetrics,
-  moduleMetrics: moduleMetrics,
-  lazySectionMetrics: lazySectionMetrics,
-  leftoverAtStartGame: null
+  loadTime: null,
+  displayTime: null,
+  actualDisplayTime: null,
+  timeBudget: levelTimeLimit, 
+  idealDisplayTime: idealDisplayTime,
+  cpu: deviceInfo.hardwareConcurrency || null,
+  rtt: networkRTT || null,
+
+  completionCode: null
 };
+
 var gameOverlay = document.getElementById("game-overlay");
 var panelTitle = document.getElementById("panel-title");
 var panelMini = document.getElementById("panel-mini");

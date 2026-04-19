@@ -736,7 +736,7 @@
             <input id="guess-input" placeholder="Please enter the 3-digit number you just saw" />
             <button class="primary" id="submit-btn">Submit</button>
             <button id="close-btn" style="display:none;">Close</button>
-            <button id="restart-btn" style="display:none;">Return to Homepage (click after taking a failure screenshot)</button>
+            <button id="restart-btn" style="display:none;">Return to Homepage</button>
             <button id="next-btn" style="display:none;">Next Level</button>
           </div>
 
@@ -839,32 +839,58 @@ badgeRemaining.textContent = "Remaining: ...";
 badgeState.textContent = "State: loading";
 
 // statistics
-var STATS_KEY = "slow_site_game_stats_v1";
+var STATS_KEY = "slow_site_game_stats_v2";
 
 function loadStats(){
   try{
     var raw = localStorage.getItem(STATS_KEY);
-    if(!raw) return { totalDisplayMs: 0, displayCount: 0, maxLevelReached: 0 };
+    if (!raw){
+      return {
+        totalDisplayMs: 0,
+        displayCount: 0,
+        totalLoadMs: 0,
+        loadCount: 0,
+        maxLevelReached: 0
+      };
+    }
+
     var s = JSON.parse(raw);
     return {
       totalDisplayMs: Number(s.totalDisplayMs) || 0,
       displayCount: Number(s.displayCount) || 0,
+      totalLoadMs: Number(s.totalLoadMs) || 0,
+      loadCount: Number(s.loadCount) || 0,
       maxLevelReached: Number(s.maxLevelReached) || 0
     };
   }catch(e){
-    return { totalDisplayMs: 0, displayCount: 0, maxLevelReached: 0 };
+    return {
+      totalDisplayMs: 0,
+      displayCount: 0,
+      totalLoadMs: 0,
+      loadCount: 0,
+      maxLevelReached: 0
+    };
   }
 }
+
 function saveStats(s){
   try{ localStorage.setItem(STATS_KEY, JSON.stringify(s)); }catch(e){}
 }
-function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull){
+function updateStatsAfterRound(currentLevel, actualDisplayTimeOrNull, loadTimeOrNull){
   var s = loadStats();
-  s.maxLevelReached = Math.max(s.maxLevelReached, currentLevel);
+
+  s.maxLevelReached = Math.max(Number(s.maxLevelReached) || 0, currentLevel);
+
   if (typeof actualDisplayTimeOrNull === "number" && isFinite(actualDisplayTimeOrNull) && actualDisplayTimeOrNull > 0){
-    s.totalDisplayMs += actualDisplayTimeOrNull;
-    s.displayCount += 1;
+    s.totalDisplayMs = (Number(s.totalDisplayMs) || 0) + actualDisplayTimeOrNull;
+    s.displayCount = (Number(s.displayCount) || 0) + 1;
   }
+
+  if (typeof loadTimeOrNull === "number" && isFinite(loadTimeOrNull) && loadTimeOrNull > 0){
+    s.totalLoadMs = (Number(s.totalLoadMs) || 0) + loadTimeOrNull;
+    s.loadCount = (Number(s.loadCount) || 0) + 1;
+  }
+
   saveStats(s);
   return s;
 }
@@ -1249,6 +1275,10 @@ async function uploadResultToGoogleSheets() {
     ? Math.round(avgStats.totalDisplayMs / avgStats.displayCount)
     : null;
 
+  var avgLoad = avgStats.loadCount > 0
+    ? Math.round(avgStats.totalLoadMs / avgStats.loadCount)
+    : null;
+
   var payload = {
     version: "unop",
     rtt: networkRTT,
@@ -1429,6 +1459,12 @@ async function finishRound(result){
   if (!metrics.completionCode){
     metrics.completionCode = generateCompletionCode();
   }
+
+  updateStatsAfterRound(
+    level,
+    metrics.actualDisplayTime,
+    metrics.loadDurationAtGate
+  );
 
   submitBtn.style.display = "none";
   guessInput.style.display = "none";
