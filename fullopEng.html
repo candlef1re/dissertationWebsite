@@ -918,7 +918,7 @@
             <input id="guess-input" placeholder="Enter the 3-digit number you just saw" />
             <button class="primary" id="submit-btn">Submit</button>
             <button id="close-btn" style="display:none;">Close</button>
-            <button id="restart-btn" style="display:none;">Return to (AFTER YOU COPIED AND ENTERED THE COMPLETION CODE!!!)</button>
+            <button id="restart-btn" style="display:none;">Return to Homepage(AFTER YOU COPIED AND ENTERED THE COMPLETION CODE!!!)</button>
             <button id="next-btn" style="display:none;">Next Level</button>
           </div>
 
@@ -1490,6 +1490,11 @@ async function finishRound(result){
   gameEnded = true;
   metrics.result = result;
 
+  var isFailure =
+  result === "wrong" ||
+  result === "no_time" ||
+  result === "no_time_load";
+  
   if (!metrics.completionCode){
     metrics.completionCode = generateCompletionCode();
   }
