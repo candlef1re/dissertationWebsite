@@ -1042,8 +1042,7 @@ function loadCriticalImage(img, idx){
   }, artificialDelay);
 }
 
-// 统一延迟 4 秒后，页面才真正开始加载资源
-var PRELOAD_SLEEP_MS = 4000;
+var PRELOAD_SLEEP_MS = 3000;
 
 var moduleMetrics = [];
 function recordModuleLoaded(id){
@@ -1455,6 +1454,12 @@ async function finishRound(result){
   if (gameEnded) return;
   gameEnded = true;
   metrics.result = result;
+  
+  var isFailure =
+  result === "wrong" ||
+  result === "no_time" ||
+  result === "no_time_load";
+
 
   if (!metrics.completionCode){
     metrics.completionCode = generateCompletionCode();
